@@ -1,4 +1,4 @@
-import { User } from 'src/common/user.entity';
+import { User } from 'src/users/entities/user.entity';
 import { Deficiency } from 'src/deficiences/entities/deficiences.entity';
 import {
   Check,
@@ -6,6 +6,7 @@ import {
   CreateDateColumn,
   Entity,
   JoinTable,
+  ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
   Unique,
@@ -34,7 +35,7 @@ export class Guideline {
   @Column({ type: 'varchar', length: 250, nullable: true })
   imageDesc: string;
 
-  @ManyToOne(() => Deficiency)
+  @ManyToMany(() => Deficiency)
   @JoinTable()
   deficiences: Deficiency[];
 

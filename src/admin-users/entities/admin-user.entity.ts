@@ -1,4 +1,4 @@
-import { User } from 'src/common/user.entity';
+import { User } from 'src/users/entities/user.entity';
 import { ChildEntity } from 'typeorm';
 
 @ChildEntity('admin')

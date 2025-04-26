@@ -1,7 +1,6 @@
 import { Guideline } from 'src/guidelines/entities/guideline.entity';
 import {
   BaseEntity,
-  Check,
   Column,
   CreateDateColumn,
   Entity,

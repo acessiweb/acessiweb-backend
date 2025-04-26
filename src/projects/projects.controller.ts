@@ -1,11 +1,13 @@
-import { Controller } from '@nestjs/common';
-import { DeficiencesService } from './deficiences.service';
+import { Body, Controller, Post } from '@nestjs/common';
+import { CreateProjectDto } from './dto/create-project.dto';
+import { ProjectsService } from './projects.service';
 
-@Controller('deficiences')
-export class DeficiencesController {
-  constructor(private readonly deficiencesService: DeficiencesService) {}
+@Controller('projects')
+export class ProjectsController {
+  constructor(private readonly projectsService: ProjectsService) {}
 
-  async findAll() {
-    return await this.deficiencesService.findAll();
+  @Post()
+  async create(@Body() createProjectDto: CreateProjectDto) {
+    return await this.projectsService.create(createProjectDto);
   }
 }

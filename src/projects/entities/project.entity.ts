@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   Entity,
   JoinTable,
+  ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -27,7 +28,7 @@ export class Project {
   @Column({ type: 'text', nullable: true })
   feedback: string;
 
-  @ManyToOne(() => Guideline)
+  @ManyToMany(() => Guideline)
   @JoinTable()
   guidelines: Guideline[];
 

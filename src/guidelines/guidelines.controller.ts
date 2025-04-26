@@ -1,17 +1,17 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { CommonUserService } from './common-users.service';
-import { CreateCommonUserDto } from './dto/create-common-user.dto';
+import { CreateGuidelineDto } from './dto/create-guideline.dto';
+import { GuidelinesService } from './guidelines.service';
 import CustomException from 'src/exceptions/custom-exception.exception';
 import { CustomHttpException } from 'src/exceptions/custom-http.exception';
 
-@Controller('common-users')
-export class CommonUserController {
-  constructor(private readonly commonUsersService: CommonUserService) {}
+@Controller('guidelines')
+export class GuidelinesController {
+  constructor(private readonly guidelinesService: GuidelinesService) {}
 
   @Post()
-  async create(@Body() createCommonUserDto: CreateCommonUserDto) {
+  async create(@Body() createGuidelineDto: CreateGuidelineDto) {
     try {
-      return await this.commonUsersService.create(createCommonUserDto);
+      return await this.guidelinesService.create(createGuidelineDto);
     } catch (e) {
       if (e instanceof CustomException) {
         throw new CustomHttpException(
