@@ -16,19 +16,13 @@ export class CommonUserService {
   ) {}
 
   async findOneBy(id: string) {
-    try {
-      const user = await this.commonUserRepository.findOneBy({ id });
+    const user = await this.commonUserRepository.findOneBy({ id });
 
-      if (!user) {
-        throw new CustomException('Usuário não encontrado', NOT_FOUND);
-      }
-
+    if (user) {
       return user;
-    } catch (e) {
-      if (e instanceof QueryFailedError) {
-        throw new CustomException('Usuário não encontrado', NOT_FOUND);
-      }
     }
+
+    throw new CustomException('Usuário não encontrado', NOT_FOUND);
   }
 
   async create(createCommonUserDto: CreateCommonUserDto) {

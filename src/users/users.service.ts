@@ -13,18 +13,12 @@ export class UsersService {
   ) {}
 
   async findOneBy(id: string) {
-    try {
-      const user = await this.userRepository.findOneBy({ id });
+    const user = await this.userRepository.findOneBy({ id });
 
-      if (!user) {
-        throw new CustomException('Usuário não encontrado', NOT_FOUND);
-      }
-
+    if (user) {
       return user;
-    } catch (e) {
-      if (e instanceof QueryFailedError) {
-        throw new CustomException('Usuário não encontrado', NOT_FOUND);
-      }
     }
+
+    throw new CustomException('Usuário não encontrado', NOT_FOUND);
   }
 }

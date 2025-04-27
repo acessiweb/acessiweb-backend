@@ -4,6 +4,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  IsUUID,
   MaxLength,
 } from 'class-validator';
 
@@ -21,13 +22,10 @@ export class CreateProjectDto {
   @ArrayNotEmpty({
     message: 'O projeto precisa ter pelo menos uma diretriz relacionada',
   })
-  @IsString({
-    each: true,
-    message: 'As diretriz é do tipo string',
-  })
+  @IsUUID(4, { each: true, message: 'A diretriz é do tipo UUID' })
   guidelines: string[];
 
-  @IsString({ message: 'O usuário do projeto é do tipo inteiro' })
+  @IsUUID(4, { message: 'O usuário do projeto é do tipo UUID' })
   @IsNotEmpty({
     message: 'O projeto precisa ter um usuário relacionado',
   })

@@ -13,19 +13,13 @@ export class DeficiencesService {
   ) {}
 
   async findOneBy(id: string): Promise<Deficiency> {
-    try {
-      const deficiency = await this.deficiencyRepository.findOneBy({ id });
+    const deficiency = await this.deficiencyRepository.findOneBy({ id });
 
-      if (!deficiency) {
-        throw new CustomException('Deficiência não encontrada', NOT_FOUND);
-      }
-
+    if (deficiency) {
       return deficiency;
-    } catch (e) {
-      if (e instanceof QueryFailedError) {
-        throw new CustomException('Deficiência não encontrada', NOT_FOUND);
-      }
     }
+
+    throw new CustomException('Deficiência não encontrada', NOT_FOUND);
   }
 
   async findAll(): Promise<Deficiency[]> {

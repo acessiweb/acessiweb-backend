@@ -4,6 +4,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  IsUUID,
   MaxLength,
 } from 'class-validator';
 
@@ -37,13 +38,13 @@ export class CreateGuidelineDto {
   @ArrayNotEmpty({
     message: 'A diretriz precisa ter ao menos uma deficiência relacionada',
   })
-  @IsString({
+  @IsUUID(4, {
     each: true,
-    message: 'A deficiência é do tipo string',
+    message: 'A deficiência é do tipo UUID',
   })
   deficiences: string[];
 
-  @IsString({ message: 'O usuário da diretriz é do tipo string' })
+  @IsUUID(4, { message: 'O usuário da diretriz é do tipo UUID' })
   @IsNotEmpty({ message: 'A diretriz precisa ter um usuário relacionado' })
   userId: string;
 }

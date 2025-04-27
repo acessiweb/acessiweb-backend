@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { QueryFailedError, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Guideline } from './entities/guideline.entity';
 import { CreateGuidelineDto } from './dto/create-guideline.dto';
@@ -7,6 +7,7 @@ import { UsersService } from 'src/users/users.service';
 import { DeficiencesService } from 'src/deficiences/deficiences.service';
 import CustomException from 'src/exceptions/custom-exception.exception';
 import { NOT_FOUND, REQUIRED_FIELD } from 'src/common/errors/errors-codes';
+import { UpdateGuidelineDto } from './dto/update-guideline.dto';
 
 @Injectable()
 export class GuidelinesService {
@@ -18,20 +19,13 @@ export class GuidelinesService {
   ) {}
 
   async findOneBy(id: string) {
-    try {
-      const guideline = await this.guidelineRepository.findOneBy({ id });
+    const guideline = await this.guidelineRepository.findOneBy({ id });
 
-      if (guideline) {
-        console.log('hey');
-        return guideline;
-      }
-
-      throw new CustomException('Diretriz não encontrada', NOT_FOUND);
-    } catch (e) {
-      if (e instanceof QueryFailedError) {
-        throw new CustomException('Diretriz não encontrada', NOT_FOUND);
-      }
+    if (guideline) {
+      return guideline;
     }
+
+    throw new CustomException(`Diretriz "${id}" não encontrada`, NOT_FOUND);
   }
 
   async create(createGuidelineDto: CreateGuidelineDto) {
@@ -80,4 +74,6 @@ export class GuidelinesService {
       id: guideline.id,
     };
   }
+
+  async update(id: string, updateGuidelineDto: UpdateGuidelineDto) {}
 }
