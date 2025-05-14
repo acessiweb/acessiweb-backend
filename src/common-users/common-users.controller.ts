@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { CommonUserService } from './common-users.service';
 import { CreateCommonUserDto } from './dto/create-common-user.dto';
-import CustomException from 'src/exceptions/custom-exception.exception';
+import CustomException from 'src/common/exceptions/custom-exception.exception';
 import { throwHttpException } from 'src/common/errors/utils';
 
 @Controller('common-users')

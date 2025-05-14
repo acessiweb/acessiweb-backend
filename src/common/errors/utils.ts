@@ -1,5 +1,5 @@
-import CustomException from 'src/exceptions/custom-exception.exception';
-import { CustomHttpException } from 'src/exceptions/custom-http.exception';
+import CustomException from 'src/common/exceptions/custom-exception.exception';
+import { CustomHttpException } from 'src/common/exceptions/custom-http.exception';
 
 export function throwHttpException(e: CustomException) {
   throw new CustomHttpException(

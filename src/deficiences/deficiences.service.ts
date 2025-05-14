@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Deficiency } from './entities/deficiences.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import CustomException from 'src/exceptions/custom-exception.exception';
+import CustomException from 'src/common/exceptions/custom-exception.exception';
 import { RESOURCE_NOT_FOUND } from 'src/common/errors/errors-codes';
 
 @Injectable()

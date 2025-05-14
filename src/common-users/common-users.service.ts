@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { CommonUser } from './entities/common-user.entity';
 import { AuthService } from 'src/auth/auth.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import CustomException from 'src/exceptions/custom-exception.exception';
+import CustomException from 'src/common/exceptions/custom-exception.exception';
 import { RESOURCE_NOT_FOUND } from 'src/common/errors/errors-codes';
 
 @Injectable()

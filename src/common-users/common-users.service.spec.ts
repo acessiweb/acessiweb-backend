@@ -4,7 +4,7 @@ import { CommonUser } from './entities/common-user.entity';
 import { AuthService } from 'src/auth/auth.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import CustomException from 'src/exceptions/custom-exception.exception';
+import CustomException from 'src/common/exceptions/custom-exception.exception';
 import { REQUIRED_FIELD } from 'src/common/errors/errors-codes';
 import { HttpStatus } from '@nestjs/common';
 
