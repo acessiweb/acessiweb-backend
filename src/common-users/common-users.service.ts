@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { CreateCommonUserDto } from './dto/create-common-user.dto';
-import { QueryFailedError, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CommonUser } from './entities/common-user.entity';
 import { AuthService } from 'src/auth/auth.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import CustomException from 'src/exceptions/custom-exception.exception';
-import { NOT_FOUND } from 'src/common/errors/errors-codes';
+import { RESOURCE_NOT_FOUND } from 'src/common/errors/errors-codes';
 
 @Injectable()
 export class CommonUserService {
@@ -22,15 +22,16 @@ export class CommonUserService {
       return user;
     }
 
-    throw new CustomException('Usuário não encontrado', NOT_FOUND);
+    throw new CustomException(
+      `Usuário com id ${id} não encontrado`,
+      RESOURCE_NOT_FOUND,
+    );
   }
 
-  async create(createCommonUserDto: CreateCommonUserDto) {
+  async create(
+    createCommonUserDto: CreateCommonUserDto,
+  ): Promise<{ id: string }> {
     const user = new CommonUser();
-
-    user.username = createCommonUserDto.username;
-
-    await this.commonUserRepository.save(user);
 
     await this.authService.create(
       {
@@ -42,8 +43,18 @@ export class CommonUserService {
       user,
     );
 
+    user.username = createCommonUserDto.username;
+
+    await this.commonUserRepository.save(user);
+
     return {
       id: user.id,
     };
+  }
+
+  async update() {}
+
+  async delete(id: string) {
+    return await this.commonUserRepository.delete(id);
   }
 }
