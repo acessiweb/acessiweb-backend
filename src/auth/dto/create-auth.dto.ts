@@ -6,7 +6,7 @@ import {
   Matches,
   MaxLength,
 } from 'class-validator';
-import { PASSWORD_MASK } from 'src/common/masks/masks';
+import { PASSWORD_MASK, PASSWORD_VALIDATION_MSG } from '../auth.constants';
 
 export class CreateAuthDto {
   @IsEmail(
@@ -15,25 +15,23 @@ export class CreateAuthDto {
       message: 'Email inválido',
     },
   )
-  @MaxLength(512)
+  @MaxLength(512, { message: 'Email deve possuir no máximo 512 caracteres' })
   @IsOptional()
   email: string;
 
-  @IsMobilePhone('pt-BR')
+  @IsMobilePhone('pt-BR', {}, { message: 'Número de celular inválido' })
   @IsOptional()
   mobilePhone: string;
 
   @Matches(PASSWORD_MASK, {
-    message:
-      'A senha precisa ter no mínimo 8 caracteres. No máximo 16 caracteres. Pelo menos uma letra maíuscula. Pelo menos um símbolo dentre os quais: @, #, *, ^, &, !, %. E pelo menos 2 caracteres numéricos',
+    message: PASSWORD_VALIDATION_MSG,
   })
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'É necessário enviar uma senha de acesso' })
   password: string;
 
   @Matches(PASSWORD_MASK, {
-    message:
-      'A senha precisa ter no mínimo 8 caracteres. No máximo 16 caracteres. Pelo menos uma letra maíuscula. Pelo menos um símbolo dentre os quais: @, #, *, ^, &, !, %. E pelo menos 2 caracteres numéricos',
+    message: PASSWORD_VALIDATION_MSG,
   })
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'É necessário enviar a confirmação da senha' })
   confirmPassword: string;
 }
