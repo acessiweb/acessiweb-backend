@@ -1,12 +1,31 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+} from '@nestjs/common';
 import { CommonUserService } from './common-users.service';
 import { CreateCommonUserDto } from './dto/create-common-user.dto';
 import CustomException from 'src/exceptions/custom-exception.exception';
-import { CustomHttpException } from 'src/exceptions/custom-http.exception';
+import { throwHttpException } from 'src/common/errors/utils';
 
 @Controller('common-users')
 export class CommonUserController {
   constructor(private readonly commonUsersService: CommonUserService) {}
+
+  @Get(':cuid')
+  async findOneBy(@Param('cuid', ParseUUIDPipe) cuid: string) {
+    try {
+      return await this.commonUsersService.findOneBy(cuid);
+    } catch (e) {
+      if (e instanceof CustomException) {
+        throwHttpException(e);
+      }
+    }
+  }
 
   @Post()
   async create(@Body() createCommonUserDto: CreateCommonUserDto) {
@@ -14,16 +33,15 @@ export class CommonUserController {
       return await this.commonUsersService.create(createCommonUserDto);
     } catch (e) {
       if (e instanceof CustomException) {
-        throw new CustomHttpException(
-          [
-            {
-              code: e.errorCode,
-              message: e.message,
-            },
-          ],
-          e.httpErrorCode,
-        );
+        throwHttpException(e);
       }
     }
+  }
+
+  @Delete(':cuid')
+  async delete(@Param('cuid', ParseUUIDPipe) cuid: string) {
+    try {
+      return await this.commonUsersService.delete(cuid);
+    } catch (e) {}
   }
 }
