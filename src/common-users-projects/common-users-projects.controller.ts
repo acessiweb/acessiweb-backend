@@ -18,12 +18,9 @@ import { QueryFailedError } from 'typeorm';
 import { DUPLICATE_DATA } from 'src/common/errors/errors-codes';
 import { ProjectsService } from 'src/projects/projects.service';
 import { UpdateProjectDto } from 'src/projects/dto/update-project.dto';
-import {
-  LIMIT_DEFAULT,
-  OFFSET_DEFAULT,
-} from 'src/common/pagination/pagination';
 import { CreateCommonUserProjectDto } from './dto/create-common-user-project.dto';
 import { throwHttpException } from 'src/common/errors/utils';
+import { LIMIT_DEFAULT, OFFSET_DEFAULT } from 'src/common/constants/pagination';
 
 @Controller('common-users/:cuid/projects')
 export class CommonUserProjectsController {
