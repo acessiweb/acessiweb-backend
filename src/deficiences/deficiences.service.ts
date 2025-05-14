@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { QueryFailedError, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Deficiency } from './entities/deficiences.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import CustomException from 'src/exceptions/custom-exception.exception';
-import { NOT_FOUND } from 'src/common/errors/errors-codes';
+import { RESOURCE_NOT_FOUND } from 'src/common/errors/errors-codes';
 
 @Injectable()
 export class DeficiencesService {
@@ -19,7 +19,10 @@ export class DeficiencesService {
       return deficiency;
     }
 
-    throw new CustomException('Deficiência não encontrada', NOT_FOUND);
+    throw new CustomException(
+      `Deficiência com id ${id} não encontrada`,
+      RESOURCE_NOT_FOUND,
+    );
   }
 
   async findAll(): Promise<Deficiency[]> {
