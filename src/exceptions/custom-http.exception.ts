@@ -3,6 +3,7 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 interface FieldError {
   code: string;
   message: string;
+  fields: string[];
 }
 
 export class CustomHttpException extends HttpException {
