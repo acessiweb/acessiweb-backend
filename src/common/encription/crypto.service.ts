@@ -13,7 +13,8 @@ export class CryptoService {
   ivLength = 16;
 
   toHash(value: string) {
-    return this.hash.update(value).digest('base64');
+    const hashCopy = this.hash.copy();
+    return hashCopy.update(value.trim().toLowerCase()).digest('base64');
   }
 
   encrypt(value: string) {
