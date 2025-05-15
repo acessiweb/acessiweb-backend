@@ -7,7 +7,7 @@ This is a REST API for my final project in the Information Systems course.
 ## TDD
 
 For this project was created a Technical Design Document, that can be accessed in the following link:
-![Acessiweb TDD](https://kind-parent-217.notion.site/TDD-1b1fcc794298803a9903faa23e46a487?pvs=74)
+[Acessiweb TDD](https://kind-parent-217.notion.site/TDD-1b1fcc794298803a9903faa23e46a487?pvs=74)
 
 ## Features
 
