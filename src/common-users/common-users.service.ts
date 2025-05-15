@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CreateCommonUserDto } from './dto/create-common-user.dto';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { CommonUser } from './entities/common-user.entity';
 import { AuthService } from 'src/auth/auth.service';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -13,6 +13,7 @@ export class CommonUserService {
     @InjectRepository(CommonUser)
     private readonly commonUserRepository: Repository<CommonUser>,
     private readonly authService: AuthService,
+    private readonly dataSource: DataSource,
   ) {}
 
   async findOneBy(id: string) {
@@ -31,24 +32,33 @@ export class CommonUserService {
   async create(
     createCommonUserDto: CreateCommonUserDto,
   ): Promise<{ id: string }> {
-    const user = new CommonUser();
+    const userId = await this.dataSource.transaction(
+      async (transactionalEntityManager) => {
+        const user = new CommonUser();
+        user.username = createCommonUserDto.username;
 
-    await this.authService.create(
-      {
-        email: createCommonUserDto.email,
-        mobilePhone: createCommonUserDto.mobilePhone,
-        password: createCommonUserDto.password,
-        confirmPassword: createCommonUserDto.confirmPassword,
+        const savedUser = await transactionalEntityManager.save(user);
+
+        const auth = await this.authService.create(
+          {
+            email: createCommonUserDto.email,
+            mobilePhone: createCommonUserDto.mobilePhone,
+            password: createCommonUserDto.password,
+            confirmPassword: createCommonUserDto.confirmPassword,
+          },
+          savedUser,
+        );
+
+        await transactionalEntityManager.save(auth);
+
+        return user.id;
       },
-      user,
     );
 
-    user.username = createCommonUserDto.username;
-
-    await this.commonUserRepository.save(user);
+    //enviar email ou sms de verificação
 
     return {
-      id: user.id,
+      id: userId,
     };
   }
 
