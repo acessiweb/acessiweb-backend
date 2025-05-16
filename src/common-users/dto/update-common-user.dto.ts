@@ -1,7 +1,7 @@
 import { OmitType } from '@nestjs/mapped-types';
 import { CreateCommonUserDto } from './create-common-user.dto';
 
-export class UpdateProjectDto extends OmitType(CreateCommonUserDto, [
+export class updateCommonUserDto extends OmitType(CreateCommonUserDto, [
   'email',
   'confirmPassword',
   'mobilePhone',

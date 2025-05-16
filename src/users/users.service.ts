@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { QueryFailedError, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import CustomException from 'src/exceptions/custom-exception.exception';
-import { NOT_FOUND } from 'src/common/errors/errors-codes';
+import CustomException from 'src/common/exceptions/custom-exception.exception';
+import { RESOURCE_NOT_FOUND } from 'src/common/errors/errors-codes';
 
 @Injectable()
 export class UsersService {
@@ -19,6 +19,9 @@ export class UsersService {
       return user;
     }
 
-    throw new CustomException('Usuário não encontrado', NOT_FOUND);
+    throw new CustomException(
+      `Usuário com id ${id} não encontrado`,
+      RESOURCE_NOT_FOUND,
+    );
   }
 }
