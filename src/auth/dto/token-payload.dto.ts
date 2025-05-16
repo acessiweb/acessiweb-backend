@@ -1,6 +1,7 @@
 export class TokenPayloadDto {
-  sub: number;
-  email: string;
+  sub: string;
+  email?: string;
+  mobilePhone?: string;
   iat: number;
   exp: number;
   aud: string;

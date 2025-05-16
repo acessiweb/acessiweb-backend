@@ -1,10 +1,25 @@
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsEmail,
+  IsMobilePhone,
+  IsNotEmpty,
+  IsOptional,
+  MaxLength,
+} from 'class-validator';
 
 export class LoginDto {
-  @IsEmail()
+  @IsEmail(
+    {},
+    {
+      message: 'Email inválido',
+    },
+  )
+  @IsOptional()
   email: string;
 
-  @IsString()
-  @IsNotEmpty()
+  @IsMobilePhone('pt-BR', {}, { message: 'Número de celular inválido' })
+  @IsOptional()
+  mobilePhone: string;
+
+  @IsNotEmpty({ message: 'Campo de senha é obrigatório' })
   password: string;
 }

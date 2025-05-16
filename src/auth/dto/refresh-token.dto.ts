@@ -1,6 +1,6 @@
 import { IsNotEmpty } from 'class-validator';
 
 export class RefreshTokenDto {
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Refresh token precisa ser informado' })
   refreshToken: string;
 }

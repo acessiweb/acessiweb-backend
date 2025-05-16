@@ -1,69 +1,56 @@
-// import {
-//   CanActivate,
-//   ExecutionContext,
-//   Inject,
-//   Injectable,
-//   UnauthorizedException,
-// } from '@nestjs/common';
-// import { JwtService } from '@nestjs/jwt';
-// import { Request } from 'express';
-// import jwtConfig from '../config/jwt.config';
-// import { ConfigType } from '@nestjs/config';
-// import { REQUEST_TOKEN_PAYLOAD_KEY } from '../auth.constants';
-// import { InjectRepository } from '@nestjs/typeorm';
-// import { Pessoa } from 'src/pessoas/entities/pessoa.entity';
-// import { Repository } from 'typeorm';
+import {
+  CanActivate,
+  ExecutionContext,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
+import { Request } from 'express';
+import CustomException from 'src/common/exceptions/custom-exception.exception';
+import { NOT_SIGN_IN } from 'src/common/errors/errors-codes';
+import { REQUEST_TOKEN_PAYLOAD } from '../auth.constants';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Auth } from '../entities/auth.entity';
+import { Repository } from 'typeorm';
+import { JwtHelpers } from '../helpers/auth-jwt.helper';
 
-// @Injectable()
-// export class AuthTokenGuard implements CanActivate {
-//   constructor(
-//     @InjectRepository(Pessoa)
-//     private readonly pessoaRepository: Repository<Pessoa>,
-//     private readonly jwtService: JwtService,
-//     @Inject(jwtConfig.KEY)
-//     private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
-//   ) {}
+@Injectable()
+export class AuthTokenGuard implements CanActivate {
+  constructor(
+    @InjectRepository(Auth)
+    private readonly authRepository: Repository<Auth>,
+    private readonly jwtHelpers: JwtHelpers,
+  ) {}
 
-//   async canActivate(context: ExecutionContext): Promise<boolean> {
-//     const request: Request = context.switchToHttp().getRequest();
-//     const token = this.extractTokenFromHeader(request);
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request: Request = context.switchToHttp().getRequest();
+    const token = this.extractTokenFromHeader(request);
 
-//     if (!token) {
-//       throw new UnauthorizedException('Não logado!');
-//     }
+    if (!token) {
+      throw new CustomException(
+        'Usuário não logado',
+        NOT_SIGN_IN,
+        [],
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
 
-//     try {
-//       const payload = await this.jwtService.verifyAsync(
-//         token,
-//         this.jwtConfiguration,
-//       );
+    const { jwtVerify } = await this.jwtHelpers.isAuthorized(
+      token,
+      this.authRepository,
+    );
 
-//       const pessoa = await this.pessoaRepository.findOneBy({
-//         id: payload.sub,
-//         active: true,
-//       });
+    request[REQUEST_TOKEN_PAYLOAD] = jwtVerify;
 
-//       if (!pessoa) {
-//         throw new UnauthorizedException('Pessoa não autorizada');
-//       }
+    return true;
+  }
 
-//       payload['pessoa'] = pessoa;
+  extractTokenFromHeader(request: Request): string {
+    const authorization = request.headers?.authorization;
 
-//       request[REQUEST_TOKEN_PAYLOAD_KEY] = payload;
-//     } catch (error) {
-//       throw new UnauthorizedException(error.message);
-//     }
+    if (!authorization || typeof authorization !== 'string') {
+      return;
+    }
 
-//     return true;
-//   }
-
-//   extractTokenFromHeader(request: Request): string | undefined {
-//     const authorization = request.headers?.authorization;
-
-//     if (!authorization || typeof authorization !== 'string') {
-//       return;
-//     }
-
-//     return authorization.split(' ')[1];
-//   }
-// }
+    return authorization.split(' ')[1];
+  }
+}

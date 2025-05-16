@@ -1,6 +1,7 @@
 import { User } from 'src/users/entities/user.entity';
 import {
   Column,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   OneToOne,
@@ -63,4 +64,7 @@ export class Auth {
   @OneToOne(() => User)
   @JoinColumn()
   user: User;
+
+  @DeleteDateColumn({ type: 'timestamp without time zone', nullable: true })
+  deletedAt: Date;
 }

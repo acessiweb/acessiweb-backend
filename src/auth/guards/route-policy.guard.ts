@@ -1,48 +1,50 @@
-// import {
-//   CanActivate,
-//   ExecutionContext,
-//   Injectable,
-//   UnauthorizedException,
-// } from '@nestjs/common';
-// import { Reflector } from '@nestjs/core';
-// import { REQUEST_TOKEN_PAYLOAD_KEY, ROUTE_POLICY_KEY } from '../auth.constants';
-// import { RoutePolicies } from '../enum/route-policies.enum';
-// import { Pessoa } from 'src/pessoas/entities/pessoa.entity';
+import {
+  CanActivate,
+  ExecutionContext,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { REQUEST_TOKEN_PAYLOAD, ROUTE_POLICY_KEY } from '../auth.constants';
+import { RoutePolicies } from '../enum/route-policies.enum';
+import CustomException from 'src/common/exceptions/custom-exception.exception';
+import { UNAUTHORIZED } from 'src/common/errors/errors-codes';
 
-// @Injectable()
-// export class RoutePolicyGuard implements CanActivate {
-//   constructor(private readonly reflector: Reflector) {}
+@Injectable()
+export class RoutePolicyGuard implements CanActivate {
+  constructor(private readonly reflector: Reflector) {}
 
-//   async canActivate(context: ExecutionContext): Promise<boolean> {
-//     const routePolicyRequired = this.reflector.get<RoutePolicies | undefined>(
-//       ROUTE_POLICY_KEY,
-//       context.getHandler(),
-//     );
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const routePolicyRequired = this.reflector.get<RoutePolicies | undefined>(
+      ROUTE_POLICY_KEY,
+      context.getHandler(),
+    );
 
-//     // Não precisamos de permissões para essa rota
-//     // visto que nenhuma foi configurada
-//     if (!routePolicyRequired) {
-//       return true;
-//     }
+    if (!routePolicyRequired) {
+      return true;
+    }
 
-//     // Precisamos do tokenPayload vindo de AuthTokenGuard para continuar
-//     const request = context.switchToHttp().getRequest();
-//     const tokenPayload = request[REQUEST_TOKEN_PAYLOAD_KEY];
+    const request = context.switchToHttp().getRequest();
+    const tokenPayload = request[REQUEST_TOKEN_PAYLOAD];
 
-//     if (!tokenPayload) {
-//       throw new UnauthorizedException(
-//         `Rota requer permissão ${routePolicyRequired}. Usuário não logado.`,
-//       );
-//     }
+    if (!tokenPayload) {
+      throw new CustomException(
+        `Rota requer permissão ${routePolicyRequired}. Usuário não logado.`,
+        UNAUTHORIZED,
+        [],
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
 
-//     const { pessoa }: { pessoa: Pessoa } = tokenPayload;
+    if (!tokenPayload.routePolicies.includes(routePolicyRequired)) {
+      throw new CustomException(
+        `Usuário não tem permissão ${routePolicyRequired}`,
+        UNAUTHORIZED,
+        [],
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
 
-//     // if (!pessoa.routePolicies.includes(routePolicyRequired)) {
-//     //   throw new UnauthorizedException(
-//     //     `Usuário não tem permissão ${routePolicyRequired}`,
-//     //   );
-//     // }
-
-//     return true;
-//   }
-// }
+    return true;
+  }
+}
