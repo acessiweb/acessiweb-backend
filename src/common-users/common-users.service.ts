@@ -6,6 +6,7 @@ import { AuthService } from 'src/auth/auth.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import CustomException from 'src/common/exceptions/custom-exception.exception';
 import { RESOURCE_NOT_FOUND } from 'src/common/errors/errors-codes';
+import { updateCommonUserDto } from './dto/update-common-user.dto';
 
 @Injectable()
 export class CommonUserService {
@@ -16,7 +17,7 @@ export class CommonUserService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async findOneBy(id: string) {
+  async findOneBy(id: string): Promise<CommonUser> {
     const user = await this.commonUserRepository.findOneBy({ id });
 
     if (user) {
@@ -62,9 +63,24 @@ export class CommonUserService {
     };
   }
 
-  async update() {}
+  async update(
+    id: string,
+    updateCommonUserDto: updateCommonUserDto,
+  ): Promise<{ id: string; username: string }> {
+    const updated = await this.commonUserRepository
+      .createQueryBuilder()
+      .update(CommonUser)
+      .set(updateCommonUserDto)
+      .where('id = :id', { id: id })
+      .returning(['username'])
+      .execute();
+
+    const { username } = updated.raw[0];
+
+    return { id, username };
+  }
 
   async delete(id: string) {
-    return await this.commonUserRepository.delete(id);
+    return await this.commonUserRepository.softDelete(id);
   }
 }
