@@ -16,7 +16,7 @@ export abstract class User extends BaseEntity {
   id: string;
 
   @Column()
-  role: 'common' | 'admin';
+  role: 'user' | 'admin';
 
   @CreateDateColumn({
     type: 'timestamp without time zone',
