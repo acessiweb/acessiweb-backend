@@ -2,9 +2,9 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Project } from './entities/project.entity';
 import { ProjectsService } from './projects.service';
-import { ProjectsController } from './projects.controller';
 import { CommonUserModule } from 'src/common-users/common-users.module';
 import { GuidelinesModule } from 'src/guidelines/guidelines.module';
+import { ProjectsRepository } from './projects.repository';
 
 @Module({
   imports: [
@@ -12,8 +12,7 @@ import { GuidelinesModule } from 'src/guidelines/guidelines.module';
     CommonUserModule,
     GuidelinesModule,
   ],
-  controllers: [ProjectsController],
-  providers: [ProjectsService],
-  exports: [ProjectsService],
+  providers: [ProjectsService, ProjectsRepository],
+  exports: [ProjectsService, ProjectsRepository],
 })
 export class ProjectsModule {}

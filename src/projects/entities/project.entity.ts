@@ -3,6 +3,7 @@ import { Guideline } from 'src/guidelines/entities/guideline.entity';
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinTable,
   ManyToMany,
@@ -21,9 +22,6 @@ export class Project {
 
   @Column({ type: 'text', nullable: true })
   description: string;
-
-  @Column({ type: 'tsvector', nullable: true })
-  descTsv: string;
 
   @Column({ type: 'text', nullable: true })
   feedback: string;
@@ -48,4 +46,7 @@ export class Project {
     nullable: false,
   })
   updatedAt: Date;
+
+  @DeleteDateColumn({ type: 'timestamp without time zone', nullable: true })
+  deletedAt: Date;
 }

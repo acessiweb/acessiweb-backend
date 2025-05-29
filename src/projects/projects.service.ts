@@ -1,138 +1,121 @@
-import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { Project } from './entities/project.entity';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { CommonUserService } from 'src/common-users/common-users.service';
 import { GuidelinesService } from 'src/guidelines/guidelines.service';
 import { UpdateProjectDto } from './dto/update-project.dto';
-import { DataSource } from 'typeorm';
 import { Guideline } from 'src/guidelines/entities/guideline.entity';
-import { compareArrays } from 'src/common/utils/compare';
+import {
+  DELETE_OPERATION_FAILED,
+  REQUIRED_FIELD,
+  RESOURCE_NOT_FOUND,
+} from 'src/common/errors/errors-codes';
+import CustomException from 'src/common/exceptions/custom-exception.exception';
+import { ProjectsRepository } from './projects.repository';
+import { getIdsToAdd, getIdsToRemove } from 'src/common/utils/filter';
 
 @Injectable()
 export class ProjectsService {
   constructor(
-    @InjectRepository(Project)
-    private projectRepository: Repository<Project>,
-    private commonUserService: CommonUserService,
-    private guidelinesService: GuidelinesService,
-    private readonly dataSource: DataSource,
+    private readonly commonUserService: CommonUserService,
+    private readonly guidelinesService: GuidelinesService,
+    private readonly projRepo: ProjectsRepository,
   ) {}
 
+  async getSanitizedArrayOfIds(ids: string[]) {
+    const removedDuplicate = new Set(ids);
+
+    const data = [];
+
+    for (let rd of removedDuplicate) {
+      try {
+        const found = await this.guidelinesService.findOne(rd);
+        data.push(found);
+      } catch (e) {
+        console.log(e);
+      }
+    }
+
+    return data;
+  }
+
   async create(createProjectDto: CreateProjectDto): Promise<{ id: string }> {
-    const project = new Project();
-
-    project.name = createProjectDto.name;
-    project.description = createProjectDto.desc;
-
     const [user, guidelines] = await Promise.all([
       this.commonUserService.findOneBy(createProjectDto.userId),
-      Promise.all(
-        createProjectDto.guidelines.map((guide) =>
-          this.guidelinesService.findOneBy(guide),
-        ),
-      ),
+      this.getSanitizedArrayOfIds(createProjectDto.guidelines),
     ]);
 
+    if (guidelines.length === 0) {
+      throw new CustomException(
+        'O projeto precisa ter ao menos uma diretriz relacionada',
+        REQUIRED_FIELD,
+        ['guidelines'],
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const project = new Project();
+    project.name = createProjectDto.name;
+    project.description = createProjectDto.desc;
     project.guidelines = guidelines;
     project.user = user;
 
-    await this.projectRepository.save(project);
+    const projectSaved = await this.projRepo.create(project);
 
     return {
-      id: project.id,
+      id: projectSaved.id,
     };
   }
 
-  async update(
-    id: string,
-    updateProjectDto: UpdateProjectDto,
-  ): Promise<{
-    id: string;
-    name: string;
-    description: string;
-    feedback: string;
-    guidelines: Guideline[];
-  }> {
-    const [projectUpdated, guidelinesUpdated] = await Promise.all([
-      this.projectRepository
-        .createQueryBuilder()
-        .update(Project)
-        .set({
-          name: updateProjectDto.name,
-          description: updateProjectDto.desc,
-          feedback: updateProjectDto.feedback,
-        })
-        .where('id = :id', { id: id })
-        .returning(['name', 'description', 'feedback'])
-        .execute(),
-      this.updateGuidelines(id, updateProjectDto.guidelines),
-    ]);
+  async update(id: string, updateProjectDto: UpdateProjectDto) {
+    const project = await this.findOne(id);
+    const currentIds = project.guidelines.map((guide) => guide.id);
 
-    const { name, description, feedback } = projectUpdated.raw[0];
-
-    return {
+    return await this.projRepo.update(
       id,
-      name,
-      description,
-      feedback,
-      guidelines: guidelinesUpdated,
-    };
-  }
-
-  private async getGuidelinesWithValues(
-    projectId: string,
-  ): Promise<Guideline[]> {
-    const sql = `
-      SELECT g.id, g.name, g.description
-      FROM guideline g
-      JOIN project_guidelines_guideline pg
-        ON pg."guidelineId" = g.id
-      WHERE pg."projectId" = '${projectId}'; 
-    `;
-
-    return await this.dataSource.query(sql);
-  }
-
-  private async updateGuidelines(
-    projectId: string,
-    guides: UpdateProjectDto['guidelines'],
-  ) {
-    const currentGuides = await this.getGuidelinesWithValues(projectId);
-
-    const currentIds = currentGuides.map((guide) => guide.id);
-
-    if (compareArrays(guides, currentIds)) {
-      return currentGuides;
-    }
-
-    await Promise.all(
-      guides.map((guide) => this.guidelinesService.findOneBy(guide)),
+      updateProjectDto.name,
+      updateProjectDto.desc,
+      updateProjectDto.feedback,
+      getIdsToAdd(currentIds, updateProjectDto.guidelines),
+      getIdsToRemove(currentIds, updateProjectDto.guidelines),
     );
+  }
 
-    const toRemove = currentIds.filter((id) => !guides.includes(id));
+  async delete(id: string) {
+    await this.findOne(id);
+    const deleted = await this.projRepo.delete(id);
 
-    const toAdd = guides.filter((id) => !currentIds.includes(id));
-
-    if (toRemove.length) {
-      await this.dataSource
-        .createQueryBuilder()
-        .relation(Project, 'guidelines')
-        .of(projectId)
-        .remove(toRemove);
+    if (deleted.affected > 0) {
+      return {
+        id,
+      };
     }
 
-    if (toAdd.length) {
-      await this.dataSource
-        .createQueryBuilder()
-        .relation(Project, 'guidelines')
-        .of(projectId)
-        .add(toAdd);
-    }
+    throw new CustomException(
+      `Não foi possível deletar projeto id ${id}`,
+      DELETE_OPERATION_FAILED,
+      [],
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+  }
 
-    const newGuides = await this.getGuidelinesWithValues(projectId);
+  async findOne(id: string) {
+    const project = await this.projRepo.findOne(id);
+    if (project) return project;
+    throw new CustomException(
+      `Projeto com id ${id} não encontrado`,
+      RESOURCE_NOT_FOUND,
+    );
+  }
 
-    return newGuides;
+  async findAll(query: {
+    commonUserId?: string;
+    keyword?: string;
+    limit?: number;
+    offset?: number;
+    initialDate?: Date;
+    endDate?: Date;
+  }) {
+    return await this.projRepo.findAll(query);
   }
 }
