@@ -8,14 +8,17 @@ import {
 } from '@testcontainers/postgresql';
 import { Deficiency } from 'src/deficiences/entities/deficiences.entity';
 import { DeficiencesService } from 'src/deficiences/deficiences.service';
-import { deficiencesMock } from 'test/__mocks__/deficiences.service.mock';
 import { DeficiencesModule } from 'src/deficiences/deficiences.module';
+import { DatabaseSeederService } from 'test/database-seeder.service';
+import { Guideline } from 'src/guidelines/entities/guideline.entity';
+import { User } from 'src/users/entities/user.entity';
 
 describe('DeficiencesService (integration)', () => {
   let app: INestApplication;
   let postgresContainer: StartedPostgreSqlContainer;
   let repo: Repository<Deficiency>;
   let service: DeficiencesService;
+  let seeder: DatabaseSeederService;
 
   beforeAll(async () => {
     postgresContainer = await new PostgreSqlContainer().start();
@@ -32,8 +35,10 @@ describe('DeficiencesService (integration)', () => {
           dropSchema: true,
           entities: [Deficiency],
         }),
+        TypeOrmModule.forFeature([Deficiency, Guideline, User]),
         DeficiencesModule,
       ],
+      providers: [DatabaseSeederService],
     }).compile();
 
     app = moduleFixture.createNestApplication();
@@ -43,41 +48,22 @@ describe('DeficiencesService (integration)', () => {
     repo = moduleFixture.get<Repository<Deficiency>>(
       getRepositoryToken(Deficiency),
     );
+
+    repo.clear();
+
+    seeder = moduleFixture.get<DatabaseSeederService>(DatabaseSeederService);
+    await seeder.seed();
   });
 
   afterEach(async () => {
-    await app.close();
-  });
-
-  afterAll(async () => {
-    await postgresContainer.stop();
+    await Promise.all([app.close(), postgresContainer.stop()]);
   });
 
   describe('findAll()', () => {
     it('should return all deficiences', async () => {
-      const def1 = await repo.save({
-        name: deficiencesMock[0].name,
-      });
-
-      const def2 = await repo.save({
-        name: deficiencesMock[1].name,
-      });
-
-      const def3 = await repo.save({
-        name: deficiencesMock[2].name,
-      });
-
-      const def4 = await repo.save({
-        name: deficiencesMock[3].name,
-      });
-
-      const def5 = await repo.save({
-        name: deficiencesMock[4].name,
-      });
-
+      const deficiencesStored = await repo.find();
       const deficiences = await service.findAll();
-
-      expect(deficiences).toEqual([def1, def2, def3, def4, def5]);
+      expect(deficiences).toEqual(deficiencesStored);
     });
   });
 });

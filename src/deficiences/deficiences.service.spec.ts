@@ -35,36 +35,30 @@ describe('DeficiencesService (unit)', () => {
 
   describe('findOne()', () => {
     it('should return deficiency if found', async () => {
-      jest
-        .spyOn(repo, 'findOneBy')
-        .mockResolvedValue({ id: deficiencesMock[0].id } as Deficiency);
+      const mockResult = { id: deficiencesMock[0].id } as Deficiency;
 
-      const deficiency = await service.findOneBy(deficiencesMock[0].id);
+      jest.spyOn(repo, 'findOneBy').mockResolvedValue(mockResult);
 
-      expect(deficiency).toStrictEqual({
-        id: deficiencesMock[0].id,
-      } as Deficiency);
+      const deficiency = await service.findOneBy(mockResult.id);
+
+      expect(deficiency).toStrictEqual(mockResult);
     });
 
     it('should throw an error if deficiency not found', async () => {
       const deficiencyId = 'dfsdfsafds';
+      const exception = new CustomException(
+        `Deficiência com id ${deficiencyId} não encontrada`,
+        RESOURCE_NOT_FOUND,
+      );
 
-      jest
-        .spyOn(repo, 'findOneBy')
-        .mockRejectedValue(
-          new CustomException(
-            `Deficiência com id ${deficiencyId} não encontrada`,
-            RESOURCE_NOT_FOUND,
-          ),
-        );
+      jest.spyOn(repo, 'findOneBy').mockRejectedValue(exception);
 
       try {
         await service.findOneBy(deficiencyId);
       } catch (e) {
         expect(e).toBeInstanceOf(CustomException);
-        expect(e.message).toBe(
-          `Deficiência com id ${deficiencyId} não encontrada`,
-        );
+        expect(e.message).toBe(exception.message);
+        expect(e.errorCode).toBe(exception.errorCode);
       }
     });
   });

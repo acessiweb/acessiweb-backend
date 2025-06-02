@@ -9,6 +9,6 @@ export class Deficiency {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'varchar', length: '15' })
+  @Column({ type: 'varchar', nullable: false })
   name: string;
 }
