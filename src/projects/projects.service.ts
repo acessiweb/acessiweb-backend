@@ -4,7 +4,6 @@ import { CreateProjectDto } from './dto/create-project.dto';
 import { CommonUserService } from 'src/common-users/common-users.service';
 import { GuidelinesService } from 'src/guidelines/guidelines.service';
 import { UpdateProjectDto } from './dto/update-project.dto';
-import { Guideline } from 'src/guidelines/entities/guideline.entity';
 import {
   DELETE_OPERATION_FAILED,
   REQUIRED_FIELD,
@@ -31,15 +30,13 @@ export class ProjectsService {
       try {
         const found = await this.guidelinesService.findOne(rd);
         data.push(found);
-      } catch (e) {
-        console.log(e);
-      }
+      } catch (e) {}
     }
 
     return data;
   }
 
-  async create(createProjectDto: CreateProjectDto): Promise<{ id: string }> {
+  async create(createProjectDto: CreateProjectDto) {
     const [user, guidelines] = await Promise.all([
       this.commonUserService.findOneBy(createProjectDto.userId),
       this.getSanitizedArrayOfIds(createProjectDto.guidelines),
@@ -109,10 +106,10 @@ export class ProjectsService {
   }
 
   async findAll(query: {
+    limit: number;
+    offset: number;
     commonUserId?: string;
     keyword?: string;
-    limit?: number;
-    offset?: number;
     initialDate?: Date;
     endDate?: Date;
   }) {

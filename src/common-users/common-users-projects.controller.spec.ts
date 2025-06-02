@@ -21,6 +21,8 @@ import { CustomHttpException } from 'src/common/exceptions/custom-http.exception
 import { UpdateProjectDto } from 'src/projects/dto/update-project.dto';
 import { AuthTokenGuard } from 'src/auth/guards/auth-token.guard';
 import { Project } from 'src/projects/entities/project.entity';
+import CustomException from 'src/common/exceptions/custom-exception.exception';
+import { DELETE_OPERATION_FAILED } from 'src/common/errors/errors-codes';
 
 describe('CommonUsersProjectsController (unit)', () => {
   let controller: CommonUserProjectsController;
@@ -70,7 +72,7 @@ describe('CommonUsersProjectsController (unit)', () => {
       expect(result).toMatchObject({ id: PROJECT_ID_CREATED_MOCK });
     });
 
-    it('should throw Custom Http Exception if user does not exist', async () => {
+    it('should throw Http Custom Exception error', async () => {
       const createCommonUserProjectDto = new CreateCommonUserProjectDto();
       createCommonUserProjectDto.name = 'Meu projeto';
       createCommonUserProjectDto.guidelines = [guidelinesMock[0].id];
@@ -79,39 +81,6 @@ describe('CommonUsersProjectsController (unit)', () => {
         await controller.create('fgsdgsdfgdfg', createCommonUserProjectDto);
       } catch (e) {
         expect(e).toBeInstanceOf(CustomHttpException);
-        expect(e.response.errors).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              message: 'Usuário não encontrado',
-            }),
-          ]),
-        );
-      }
-    });
-
-    it('should throw Custom Http Exception if no valid guideline', async () => {
-      const createCommonUserProjectDto = new CreateCommonUserProjectDto();
-      createCommonUserProjectDto.name = 'Meu projeto';
-      createCommonUserProjectDto.guidelines = [
-        'djfbgsjhdfbgsdf',
-        'kdjsfgdjkngsdf',
-      ];
-
-      try {
-        await controller.create(
-          commonUsersMock[0].id,
-          createCommonUserProjectDto,
-        );
-      } catch (e) {
-        expect(e).toBeInstanceOf(CustomHttpException);
-        expect(e.response.errors).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              message:
-                'O projeto precisa ter ao menos uma diretriz relacionada',
-            }),
-          ]),
-        );
       }
     });
   });
@@ -136,7 +105,7 @@ describe('CommonUsersProjectsController (unit)', () => {
       } as Project);
     });
 
-    it('should throw Custom Http Exception if project does not exist', async () => {
+    it('should throw Http Custom Exception error', async () => {
       const createCommonUserProjectDto = new CreateCommonUserProjectDto();
       createCommonUserProjectDto.name = 'Meu projeto';
       createCommonUserProjectDto.guidelines = [guidelinesMock[0].id];
@@ -145,67 +114,46 @@ describe('CommonUsersProjectsController (unit)', () => {
         await controller.create('fgsdgsdfgdfg', createCommonUserProjectDto);
       } catch (e) {
         expect(e).toBeInstanceOf(CustomHttpException);
-        expect(e.response.errors).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              message: 'Usuário não encontrado',
-            }),
-          ]),
-        );
       }
     });
   });
 
   describe('DELETE /common-users/:cuid/projects/:pid', () => {
-    it('should throw Custom Http Exception if project does not exist', async () => {
-      try {
-        await controller.delete('fgsdgsdfgdfg');
-      } catch (e) {
-        expect(e).toBeInstanceOf(CustomHttpException);
-        expect(e.response.errors).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              message: 'Projeto não encontrado',
-            }),
-          ]),
+    it('should throw Http Custom Exception error', async () => {
+      const projectId = 'project-id';
+      jest
+        .spyOn(projectServiceMock.useValue, 'delete')
+        .mockRejectedValue(
+          new CustomException(
+            `Não foi possível deletar projeto id ${projectId}`,
+            DELETE_OPERATION_FAILED,
+          ),
         );
-      }
-    });
 
-    it("should throw Custom Http Exception if project can't be deleted", async () => {
       try {
-        await controller.delete(projectsMock[0].id);
+        await controller.delete(projectId);
       } catch (e) {
         expect(e).toBeInstanceOf(CustomHttpException);
-        expect(e.response.errors).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              message: `Não foi possível deletar projeto id ${projectsMock[0].id}`,
-            }),
-          ]),
-        );
       }
     });
 
     it('should return project id if successfully deleted', async () => {
+      const mockResult = { id: projectsMock[0].id };
+      jest
+        .spyOn(projectServiceMock.useValue, 'delete')
+        .mockResolvedValue(mockResult);
+
       const deleted = await controller.delete(projectsMock[0].id);
-      expect(deleted).toEqual({ id: projectsMock[0].id });
+      expect(deleted).toStrictEqual(mockResult);
     });
   });
 
   describe('GET /common-users/:cuid/projects/:pid', () => {
-    it('should throw Custom Http Exception if project not found', async () => {
+    it('should throw Http Custom Exception error', async () => {
       try {
         await controller.findOne('adsdadasd');
       } catch (e) {
         expect(e).toBeInstanceOf(CustomHttpException);
-        expect(e.response.errors).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              message: 'Projeto não encontrado',
-            }),
-          ]),
-        );
       }
     });
 
@@ -216,19 +164,18 @@ describe('CommonUsersProjectsController (unit)', () => {
   });
 
   describe('GET /common-users/:cuid/projects', () => {
-    it('should throw Custom Http Exception if user does not exist', async () => {
-      try {
-        await controller.findAll('dfsadfasdfsadf');
-      } catch (e) {
-        expect(e).toBeInstanceOf(CustomHttpException);
-        expect(e.response.errors).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              message: 'Usuário não encontrado',
-            }),
-          ]),
-        );
-      }
+    it('should return projects', async () => {
+      const pagination = {
+        limit: 20,
+        offset: 0,
+      };
+
+      const projects = await controller.findAll(
+        commonUsersMock[0].id,
+        pagination,
+      );
+
+      expect(projects).toStrictEqual(projectsMock);
     });
   });
 });

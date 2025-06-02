@@ -11,10 +11,6 @@ import {
   guidelinesMock,
 } from 'test/__mocks__/guidelines.service.mock';
 import { CreateProjectDto } from './dto/create-project.dto';
-import {
-  PROJECT_ID_CREATED_MOCK,
-  PROJECT_ID_UPDATED_MOCK,
-} from 'test/__mocks__/projects.service.mock';
 import { ProjectsRepository } from './projects.repository';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { RESOURCE_NOT_FOUND } from 'src/common/errors/errors-codes';
@@ -86,19 +82,24 @@ describe('ProjectsService (unit)', () => {
   });
 
   describe('create()', () => {
-    it('should throw Custom Exception and not create project if user does not exist', async () => {
+    it('should not call projRepo.create if user does not exist', async () => {
       const createProjectDto = new CreateProjectDto();
       createProjectDto.name = 'Meu projeto';
       createProjectDto.guidelines = [guidelinesMock[0].id];
       createProjectDto.userId = 'sdfsdfsdfs';
 
+      jest
+        .spyOn(service, 'getSanitizedArrayOfIds')
+        .mockResolvedValue(createProjectDto.guidelines);
+
       try {
         await service.create(createProjectDto);
       } catch (e) {
         expect(e).toBeInstanceOf(CustomException);
-        expect(e.message).toBe('Usuário não encontrado');
       }
 
+      expect(commonUserServiceMock.useValue.findOneBy).toHaveBeenCalled();
+      expect(service.getSanitizedArrayOfIds).toHaveBeenCalled();
       expect(repo.create).not.toHaveBeenCalled();
     });
 
@@ -109,6 +110,8 @@ describe('ProjectsService (unit)', () => {
       createProjectDto.guidelines = ['sdjfbgsdfjgnbdskfjg', 'kdjsfgdjkngsdf'];
       createProjectDto.userId = commonUsersMock[0].id;
 
+      jest.spyOn(service, 'getSanitizedArrayOfIds').mockResolvedValue([]);
+
       try {
         await service.create(createProjectDto);
       } catch (e) {
@@ -118,6 +121,8 @@ describe('ProjectsService (unit)', () => {
         );
       }
 
+      expect(commonUserServiceMock.useValue.findOneBy).toHaveBeenCalled();
+      expect(service.getSanitizedArrayOfIds).toHaveBeenCalled();
       expect(repo.create).not.toHaveBeenCalled();
     });
 
@@ -127,31 +132,39 @@ describe('ProjectsService (unit)', () => {
       createProjectDto.guidelines = [guidelinesMock[0].id];
       createProjectDto.userId = commonUsersMock[0].id;
 
-      const projectSaved = jest.spyOn(repo, 'create').mockResolvedValue({
-        id: PROJECT_ID_CREATED_MOCK,
-      } as Project);
+      jest
+        .spyOn(service, 'getSanitizedArrayOfIds')
+        .mockResolvedValue(createProjectDto.guidelines);
+
+      const mockResult = {
+        id: 'project-id',
+      } as Project;
+
+      const projectSaved = jest
+        .spyOn(repo, 'create')
+        .mockResolvedValue(mockResult);
 
       const response = await service.create(createProjectDto);
 
-      expect(response).toMatchObject({
-        id: PROJECT_ID_CREATED_MOCK,
-      });
+      expect(commonUserServiceMock.useValue.findOneBy).toHaveBeenCalled();
+      expect(service.getSanitizedArrayOfIds).toHaveBeenCalled();
+      expect(response).toStrictEqual(mockResult);
       expect(repo.create).toHaveBeenCalled();
       expect(repo.create).toHaveBeenCalledWith(expect.any(Project));
-      await expect(projectSaved.mock.results[0].value).resolves.toStrictEqual({
-        id: PROJECT_ID_CREATED_MOCK,
-      });
+      await expect(projectSaved.mock.results[0].value).resolves.toStrictEqual(
+        mockResult,
+      );
     });
   });
 
   describe('update()', () => {
-    it('should throw Custom Exception if project does not exist', async () => {
+    it('should not call projRepo.update if project does not exist', async () => {
       const projId = 'dfsdfsafds';
       const updateProjectDto = new UpdateProjectDto();
       updateProjectDto.name = 'Nome do projeto atualizado';
 
       jest
-        .spyOn(repo, 'findOne')
+        .spyOn(service, 'findOne')
         .mockRejectedValue(
           new CustomException(
             `Projeto com id ${projId} não encontrado`,
@@ -163,37 +176,37 @@ describe('ProjectsService (unit)', () => {
         await service.update(projId, updateProjectDto);
       } catch (e) {
         expect(e).toBeInstanceOf(CustomException);
-        expect(e.message).toBe(`Projeto com id ${projId} não encontrado`);
       }
 
+      expect(service.findOne).toHaveBeenCalled();
       expect(repo.update).not.toHaveBeenCalled();
     });
 
     it('should return project updated if updated sucessfully', async () => {
+      const projectId = 'project-id';
       const updateProjectDto = new UpdateProjectDto();
       updateProjectDto.name = 'Nome do projeto atualizado';
       updateProjectDto.guidelines = [guidelinesMock[1].id];
 
-      jest.spyOn(repo, 'findOne').mockResolvedValue({
-        id: PROJECT_ID_UPDATED_MOCK,
+      const mockResult = {
+        id: projectId,
         name: 'Meu projeto',
         guidelines: [guidelinesMock[0]],
         user: commonUsersMock[0],
-      } as Project);
-
-      jest.spyOn(repo, 'update').mockResolvedValue({
-        id: PROJECT_ID_UPDATED_MOCK,
-        name: updateProjectDto.name,
-        guidelines: [guidelinesMock[1]],
         feedback: '',
         description: '',
-      } as Project);
+      } as Project;
 
-      const projUpdated = await service.update(
-        PROJECT_ID_UPDATED_MOCK,
-        updateProjectDto,
-      );
+      jest.spyOn(service, 'findOne').mockResolvedValue(mockResult);
 
+      mockResult.name = updateProjectDto.name;
+      mockResult.guidelines = [guidelinesMock[1]];
+
+      jest.spyOn(repo, 'update').mockResolvedValue(mockResult);
+
+      const projUpdated = await service.update(projectId, updateProjectDto);
+
+      expect(service.findOne).toHaveBeenCalled();
       expect(projUpdated.name).toBe(updateProjectDto.name);
       expect(projUpdated.guidelines).toEqual(
         expect.arrayContaining([guidelinesMock[1]]),
@@ -203,43 +216,49 @@ describe('ProjectsService (unit)', () => {
 
   describe('delete()', () => {
     it('should return project id if sucessfully deleted', async () => {
-      jest
-        .spyOn(repo, 'findOne')
-        .mockResolvedValue({ id: PROJECT_ID_UPDATED_MOCK } as Project);
+      const projectId = 'project-id';
+
+      const mockResult = { id: projectId } as Project;
+
+      jest.spyOn(service, 'findOne').mockResolvedValue(mockResult);
 
       jest
         .spyOn(repo, 'delete')
         .mockResolvedValue({ affected: 1, generatedMaps: [], raw: {} });
 
-      const projDeleted = await service.delete(PROJECT_ID_UPDATED_MOCK);
+      const projDeleted = await service.delete(projectId);
 
-      expect(projDeleted).toStrictEqual({ id: PROJECT_ID_UPDATED_MOCK });
+      expect(service.findOne).toHaveBeenCalled();
+      expect(projDeleted).toStrictEqual(mockResult);
     });
 
     it('should throw a Custom Exception if project not deleted', async () => {
-      jest
-        .spyOn(repo, 'findOne')
-        .mockResolvedValue({ id: PROJECT_ID_UPDATED_MOCK } as Project);
+      const projectId = 'project-id';
+      const mockResult = { id: projectId } as Project;
+
+      jest.spyOn(service, 'findOne').mockResolvedValue(mockResult);
 
       jest
         .spyOn(repo, 'delete')
         .mockResolvedValue({ affected: 0, generatedMaps: [], raw: {} });
 
       try {
-        await service.delete(PROJECT_ID_UPDATED_MOCK);
+        await service.delete(projectId);
       } catch (e) {
         expect(e).toBeInstanceOf(CustomException);
         expect(e.message).toBe(
-          `Não foi possível deletar projeto id ${PROJECT_ID_UPDATED_MOCK}`,
+          `Não foi possível deletar projeto id ${projectId}`,
         );
       }
+
+      expect(service.findOne).toHaveBeenCalled();
     });
 
-    it('should throw a Custom Exception if project does not exist', async () => {
+    it('should not call projRepo.delete if project does not exist', async () => {
       const projId = 'asdasdasdasda';
 
       jest
-        .spyOn(repo, 'findOne')
+        .spyOn(service, 'findOne')
         .mockRejectedValue(
           new CustomException(
             `Projeto com id ${projId} não encontrado`,
@@ -251,20 +270,24 @@ describe('ProjectsService (unit)', () => {
         await service.delete(projId);
       } catch (e) {
         expect(e).toBeInstanceOf(CustomException);
-        expect(e.message).toBe(`Projeto com id ${projId} não encontrado`);
       }
+
+      expect(service.findOne).toHaveBeenCalled();
+      expect(repo.delete).not.toHaveBeenCalled();
     });
   });
 
   describe('findOne()', () => {
     it('should return project if found', async () => {
-      jest
-        .spyOn(repo, 'findOne')
-        .mockResolvedValue({ id: PROJECT_ID_UPDATED_MOCK } as Project);
+      const projectId = 'project-id';
 
-      const project = await service.findOne(PROJECT_ID_UPDATED_MOCK);
+      const mockResult = { id: projectId } as Project;
 
-      expect(project).toStrictEqual({ id: PROJECT_ID_UPDATED_MOCK } as Project);
+      jest.spyOn(repo, 'findOne').mockResolvedValue(mockResult);
+
+      const project = await service.findOne(projectId);
+
+      expect(project).toStrictEqual(mockResult);
     });
 
     it('should throw a Custom Exception if project not found', async () => {

@@ -1,11 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-  getDataSourceToken,
-  getRepositoryToken,
-  TypeOrmModule,
-} from '@nestjs/typeorm';
+import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { INestApplication } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { ProjectsService } from 'src/projects/projects.service';
 import { CommonUser } from 'src/common-users/entities/common-user.entity';
 import { Project } from 'src/projects/entities/project.entity';
@@ -20,6 +16,11 @@ import { Deficiency } from 'src/deficiences/entities/deficiences.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Guideline } from 'src/guidelines/entities/guideline.entity';
 import { UpdateProjectDto } from 'src/projects/dto/update-project.dto';
+import { DeficiencesModule } from 'src/deficiences/deficiences.module';
+import { GuidelinesModule } from 'src/guidelines/guidelines.module';
+import { UsersModule } from 'src/users/users.module';
+import { AuthModule } from 'src/auth/auth.module';
+import { CommonUserModule } from 'src/common-users/common-users.module';
 
 describe('ProjectsService (integration)', () => {
   let app: INestApplication;
@@ -29,7 +30,6 @@ describe('ProjectsService (integration)', () => {
   let seeder: DatabaseSeederService;
   let guidesRepo: Repository<Guideline>;
   let usersRepo: Repository<User>;
-  let dataSource: DataSource;
 
   beforeAll(async () => {
     postgresContainer = await new PostgreSqlContainer().start();
@@ -46,7 +46,12 @@ describe('ProjectsService (integration)', () => {
           dropSchema: true,
         }),
         TypeOrmModule.forFeature([Deficiency, Guideline, User]),
+        DeficiencesModule,
+        GuidelinesModule,
+        UsersModule,
+        AuthModule,
         ProjectsModule,
+        CommonUserModule,
       ],
       providers: [DatabaseSeederService],
     }).compile();
@@ -54,7 +59,6 @@ describe('ProjectsService (integration)', () => {
     app = moduleFixture.createNestApplication();
     await app.init();
 
-    dataSource = moduleFixture.get<DataSource>(getDataSourceToken());
     service = moduleFixture.get<ProjectsService>(ProjectsService);
     usersRepo = moduleFixture.get<Repository<CommonUser>>(
       getRepositoryToken(CommonUser),
@@ -63,8 +67,8 @@ describe('ProjectsService (integration)', () => {
     guidesRepo = moduleFixture.get<Repository<Guideline>>(
       getRepositoryToken(Guideline),
     );
-    seeder = moduleFixture.get<DatabaseSeederService>(DatabaseSeederService);
 
+    seeder = moduleFixture.get<DatabaseSeederService>(DatabaseSeederService);
     await seeder.seed();
   });
 
@@ -156,6 +160,11 @@ describe('ProjectsService (integration)', () => {
   });
 
   describe('findAll()', () => {
+    const pagination = {
+      limit: 20,
+      offset: 0,
+    };
+
     it("should return user's projects", async () => {
       const guidelines = await guidesRepo.find();
       const users = await usersRepo.find();
@@ -165,27 +174,26 @@ describe('ProjectsService (integration)', () => {
       createProjectDto.guidelines = [guidelines[0].id, guidelines[1].id];
       createProjectDto.userId = users[0].id;
 
-      const project1 = await service.create(createProjectDto);
+      const project1Id = await service.create(createProjectDto);
 
       const createProjectDto2 = new CreateProjectDto();
       createProjectDto2.name = 'Meu projeto 2';
       createProjectDto2.guidelines = [guidelines[0].id];
       createProjectDto2.userId = users[1].id;
 
-      const project2 = await service.create(createProjectDto2);
+      const project2Id = await service.create(createProjectDto2);
 
       const projects = await service.findAll({
         commonUserId: users[0].id,
+        limit: pagination.limit,
+        offset: pagination.offset,
       });
 
-      expect(projects).toEqual(
-        expect.not.arrayContaining([
-          expect.objectContaining({ id: project2.id }),
-        ]),
-      );
-      expect(projects).toEqual(
-        expect.arrayContaining([expect.objectContaining({ id: project1.id })]),
-      );
+      const project1 = await service.findOne(project1Id.id);
+      const project2 = await service.findOne(project2Id.id);
+
+      expect(projects.data).toEqual(expect.not.arrayContaining([project2]));
+      expect(projects.data).toEqual(expect.arrayContaining([project1]));
     });
 
     it('should return projects that match given keyword', async () => {
@@ -197,14 +205,14 @@ describe('ProjectsService (integration)', () => {
       createProjectDto.guidelines = [guidelines[0].id, guidelines[1].id];
       createProjectDto.userId = users[0].id;
 
-      const project1 = await service.create(createProjectDto);
+      const project1Id = await service.create(createProjectDto);
 
       const createProjectDto2 = new CreateProjectDto();
       createProjectDto2.name = 'Acessiweb';
       createProjectDto2.guidelines = [guidelines[0].id];
       createProjectDto2.userId = users[0].id;
 
-      const project2 = await service.create(createProjectDto2);
+      const project2Id = await service.create(createProjectDto2);
 
       const createProjectDto3 = new CreateProjectDto();
       createProjectDto3.name = 'Meu projeto';
@@ -212,23 +220,22 @@ describe('ProjectsService (integration)', () => {
       createProjectDto3.guidelines = [guidelines[0].id];
       createProjectDto3.userId = users[0].id;
 
-      const project3 = await service.create(createProjectDto3);
+      const project3Id = await service.create(createProjectDto3);
 
       const projects = await service.findAll({
         commonUserId: users[0].id,
         keyword: 'Acessiweb',
+        limit: pagination.limit,
+        offset: pagination.offset,
       });
 
-      expect(projects).toEqual(
-        expect.not.arrayContaining([
-          expect.objectContaining({ id: project1.id }),
-        ]),
-      );
-      expect(projects).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({ id: project2.id }),
-          expect.objectContaining({ id: project3.id }),
-        ]),
+      const project1 = await service.findOne(project1Id.id);
+      const project2 = await service.findOne(project2Id.id);
+      const project3 = await service.findOne(project3Id.id);
+
+      expect(projects.data).toEqual(expect.not.arrayContaining([project1]));
+      expect(projects.data).toEqual(
+        expect.arrayContaining([project2, project3]),
       );
     });
 
@@ -241,7 +248,7 @@ describe('ProjectsService (integration)', () => {
       createProjectDto.guidelines = [guidelines[0].id, guidelines[1].id];
       createProjectDto.userId = users[0].id;
 
-      const project1 = await service.create(createProjectDto);
+      const project1Id = await service.create(createProjectDto);
 
       const createProjectDto2 = new CreateProjectDto();
       createProjectDto2.name = 'Meu projeto 2';
@@ -257,17 +264,21 @@ describe('ProjectsService (integration)', () => {
         initialDate: new Date(
           `${date.getFullYear()}-${date.getMonth() + 3}-${date.getDay() + 3}`,
         ),
+        limit: pagination.limit,
+        offset: pagination.offset,
       });
 
       const projects2 = await service.findAll({
         commonUserId: users[0].id,
         initialDate: date,
+        limit: pagination.limit,
+        offset: pagination.offset,
       });
 
-      expect(projects).toEqual([]);
-      expect(projects2).toEqual(
-        expect.arrayContaining([expect.objectContaining({ id: project1.id })]),
-      );
+      const project1 = await service.findOne(project1Id.id);
+
+      expect(projects.data).toEqual([]);
+      expect(projects2.data).toEqual(expect.arrayContaining([project1]));
     });
   });
 });

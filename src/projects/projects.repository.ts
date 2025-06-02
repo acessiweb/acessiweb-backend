@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Project } from './entities/project.entity';
 import { Brackets, DataSource, Repository, UpdateResult } from 'typeorm';
+import { getPagination } from 'src/common/utils/pagination';
 
 @Injectable()
 export class ProjectsRepository {
@@ -45,7 +46,7 @@ export class ProjectsRepository {
   }
 
   async findOne(id: string): Promise<Project> {
-    return this.projectRepository.findOne({
+    return await this.projectRepository.findOne({
       where: { id },
       relations: {
         guidelines: true,
@@ -54,17 +55,18 @@ export class ProjectsRepository {
   }
 
   async findAll(query: {
+    limit: number;
+    offset: number;
     commonUserId?: string;
     keyword?: string;
-    limit?: number;
-    offset?: number;
     initialDate?: Date;
     endDate?: Date;
-  }): Promise<Project[]> {
+  }): Promise<PaginationResponse> {
     const qb = this.projectRepository
       .createQueryBuilder('project')
       .limit(query.limit)
       .offset(query.offset)
+      .leftJoinAndSelect('project.guidelines', 'guidelines')
       .cache(true);
 
     if (query.commonUserId) {
@@ -105,10 +107,19 @@ export class ProjectsRepository {
       });
     }
 
-    return qb.getMany();
+    const [data, total] = await qb.getManyAndCount();
+
+    const pagination = getPagination(query.offset, query.limit, total);
+
+    return {
+      data,
+      total,
+      limit: query.limit,
+      ...pagination,
+    };
   }
 
   async create(project: Project): Promise<Project> {
-    return this.projectRepository.save(project);
+    return await this.projectRepository.save(project);
   }
 }

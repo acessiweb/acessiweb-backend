@@ -101,19 +101,31 @@ export const projectServiceMock = {
         );
       }
 
-      return project;
+      return Promise.resolve(project);
     }),
     delete: jest.fn().mockImplementation(async (id: string) => {
       await projectServiceMock.useValue.findOne(id);
 
-      // throw new CustomException(
-      //   `Não foi possível deletar projeto id ${id}`,
-      //   DELETE_OPERATION_FAILED,
-      // );
+      console.log('hey');
 
-      return {
+      return Promise.resolve({
         id,
-      };
+      });
     }),
+    findAll: jest
+      .fn()
+      .mockImplementation(
+        async (query: {
+          commonUserId: string;
+          keyword: string;
+          limit: number;
+          offset: number;
+          initialDate: Date;
+          endDate: Date;
+        }) => {
+          console.log(query);
+          return projectsMock;
+        },
+      ),
   },
 };

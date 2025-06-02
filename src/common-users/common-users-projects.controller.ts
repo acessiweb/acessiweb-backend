@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
@@ -11,21 +10,20 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import CustomException from 'src/common/exceptions/custom-exception.exception';
-import { CustomHttpException } from 'src/common/exceptions/custom-http.exception';
-import { QueryFailedError } from 'typeorm';
-import { DUPLICATE_DATA } from 'src/common/errors/errors-codes';
 import { ProjectsService } from 'src/projects/projects.service';
 import { UpdateProjectDto } from 'src/projects/dto/update-project.dto';
 import { CreateCommonUserProjectDto } from '../common-users/dto/create-common-user-project.dto';
 import { throwHttpException } from 'src/common/errors/utils';
 import { AuthTokenGuard } from 'src/auth/guards/auth-token.guard';
-import { TokenPayloadParam } from 'src/auth/params/token-payload.param';
-import { TokenPayloadDto } from 'src/auth/dto/token-payload.dto';
 import { Filter, FilterParams } from 'src/common/params/filter';
 import { Pagination, PaginationParams } from 'src/common/params/pagination';
 import { CommonUserService } from './common-users.service';
+import { SetRoutePolicy } from 'src/auth/decorators/set-route-policy.decorator';
+import { RoutePolicies } from 'src/auth/enum/route-policies.enum';
+import { RoutePolicyGuard } from 'src/auth/guards/route-policy.guard';
 
-@UseGuards(AuthTokenGuard)
+@SetRoutePolicy(RoutePolicies.user)
+@UseGuards(AuthTokenGuard, RoutePolicyGuard)
 @Controller('common-users/:cuid/projects')
 export class CommonUserProjectsController {
   constructor(
@@ -46,20 +44,6 @@ export class CommonUserProjectsController {
     } catch (e) {
       if (e instanceof CustomException) {
         throwHttpException(e);
-      } else if (e instanceof QueryFailedError) {
-        if (e.message.includes('duplicar valor')) {
-          throw new CustomHttpException(
-            [
-              {
-                code: DUPLICATE_DATA,
-                message:
-                  'Não é permitido a mesma diretriz relacionada mais de uma vez com um mesmo projeto',
-                fields: [],
-              },
-            ],
-            HttpStatus.CONFLICT,
-          );
-        }
       }
     }
   }
@@ -103,23 +87,17 @@ export class CommonUserProjectsController {
   @Get()
   async findAll(
     @Param('cuid', ParseUUIDPipe) cuid: string,
-    @Pagination() pagination?: PaginationParams,
+    @Pagination() pagination: PaginationParams,
     @Filter() filters?: FilterParams,
   ) {
-    try {
-      await this.commonUserService.findOneBy(cuid);
-      return await this.projectsService.findAll({
-        commonUserId: cuid,
-        keyword: filters.keyword,
-        limit: pagination.limit,
-        offset: pagination.offset,
-        initialDate: filters.initialDate,
-        endDate: filters.endDate,
-      });
-    } catch (e) {
-      if (e instanceof CustomException) {
-        throwHttpException(e);
-      }
-    }
+    await this.commonUserService.findOneBy(cuid);
+    return await this.projectsService.findAll({
+      commonUserId: cuid,
+      keyword: filters?.keyword,
+      limit: pagination.limit,
+      offset: pagination.offset,
+      initialDate: filters?.initialDate,
+      endDate: filters?.endDate,
+    });
   }
 }
