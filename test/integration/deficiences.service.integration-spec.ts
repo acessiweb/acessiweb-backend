@@ -49,8 +49,6 @@ describe('DeficiencesService (integration)', () => {
       getRepositoryToken(Deficiency),
     );
 
-    repo.clear();
-
     seeder = moduleFixture.get<DatabaseSeederService>(DatabaseSeederService);
     await seeder.seed();
   });
