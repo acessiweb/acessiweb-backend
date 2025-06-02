@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 
 @ChildEntity('user')
-@Check(`"username" ~ '^[A-Za-z0-9]+$'`)
+@Check(`"username" ~ '^[A-Za-z0-9]+( [A-Za-z0-9]+)*$'`)
 export class CommonUser extends User {
   @Column({ type: 'varchar', length: 30, nullable: false })
   username: string;
