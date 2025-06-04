@@ -15,11 +15,11 @@ export class RoutePolicyGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const routePolicyRequired = this.reflector.get<RoutePolicies | undefined>(
-      ROUTE_POLICY_KEY,
-      context.getHandler(),
-    );
+    const routePolicyRequired = this.reflector.getAllAndOverride<
+      RoutePolicies | undefined
+    >(ROUTE_POLICY_KEY, [context.getHandler(), context.getClass()]);
 
+    //não precisa de permissões para a rota
     if (!routePolicyRequired) {
       return true;
     }
@@ -27,16 +27,7 @@ export class RoutePolicyGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const tokenPayload = request[REQUEST_TOKEN_PAYLOAD];
 
-    if (!tokenPayload) {
-      throw new CustomException(
-        `Rota requer permissão ${routePolicyRequired}. Usuário não logado.`,
-        UNAUTHORIZED,
-        [],
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
-
-    if (!tokenPayload.routePolicies.includes(routePolicyRequired)) {
+    if (!tokenPayload && tokenPayload.role !== routePolicyRequired) {
       throw new CustomException(
         `Usuário não tem permissão ${routePolicyRequired}`,
         UNAUTHORIZED,

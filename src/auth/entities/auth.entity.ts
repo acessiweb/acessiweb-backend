@@ -55,9 +55,6 @@ export class Auth {
   @Column({ default: 0 })
   smsVerificationAttempts: number;
 
-  @Column({ type: 'boolean', nullable: true, default: true })
-  active: boolean;
-
   @Column({ type: 'bytea' })
   password: string;
 

@@ -1,4 +1,6 @@
+import { ACCESS_ADMIN, ACCESS_USER } from 'src/common/constants/access';
+
 export enum RoutePolicies {
-  'admin' = 'admin',
-  'user' = 'user',
+  'admin' = ACCESS_ADMIN,
+  'user' = ACCESS_USER,
 }

@@ -8,18 +8,11 @@ import { Request } from 'express';
 import CustomException from 'src/common/exceptions/custom-exception.exception';
 import { NOT_SIGN_IN } from 'src/common/errors/errors-codes';
 import { REQUEST_TOKEN_PAYLOAD } from '../auth.constants';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Auth } from '../entities/auth.entity';
-import { Repository } from 'typeorm';
-import { JwtHelpers } from '../helpers/auth-jwt.helper';
+import { AuthService } from '../auth.service';
 
 @Injectable()
 export class AuthTokenGuard implements CanActivate {
-  constructor(
-    @InjectRepository(Auth)
-    private readonly authRepository: Repository<Auth>,
-    private readonly jwtHelpers: JwtHelpers,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest();
@@ -34,23 +27,26 @@ export class AuthTokenGuard implements CanActivate {
       );
     }
 
-    const { jwtVerify } = await this.jwtHelpers.isAuthorized(
-      token,
-      this.authRepository,
-    );
+    const tokenPayload = await this.authService.getTokenPayload(token);
 
-    request[REQUEST_TOKEN_PAYLOAD] = jwtVerify;
+    request[REQUEST_TOKEN_PAYLOAD] = tokenPayload;
 
     return true;
   }
 
-  extractTokenFromHeader(request: Request): string {
+  extractTokenFromHeader(request: Request): string | undefined {
     const authorization = request.headers?.authorization;
 
     if (!authorization || typeof authorization !== 'string') {
-      return;
+      return undefined;
     }
 
-    return authorization.split(' ')[1];
+    const parts = authorization.split(' ');
+
+    if (parts.length !== 2 || parts[0] !== 'Bearer') {
+      return undefined;
+    }
+
+    return parts[1];
   }
 }

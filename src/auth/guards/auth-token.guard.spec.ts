@@ -22,7 +22,7 @@ describe('AuthTokenGuard', () => {
         {
           provide: AuthService,
           useValue: {
-            isAuthorized: jest.fn(),
+            getTokenPayload: jest.fn(),
           },
         },
       ],
@@ -115,15 +115,14 @@ describe('AuthTokenGuard', () => {
       } as TokenPayloadDto;
       mockRequest.headers = { authorization: `Bearer ${mockToken}` };
 
-      jest.spyOn(authService, 'isAuthorized').mockResolvedValue({
-        auth: { id: 'sdfsffsdf' } as Auth,
-        tokenPayload,
-      });
+      jest
+        .spyOn(authService, 'getTokenPayload')
+        .mockResolvedValue(tokenPayload);
 
       const result = await authTokenGuard.canActivate(mockExecutionContext);
 
       expect(result).toBe(true);
-      expect(authService.isAuthorized).toHaveBeenCalledWith(mockToken);
+      expect(authService.getTokenPayload).toHaveBeenCalledWith(mockToken);
       expect(mockRequest[REQUEST_TOKEN_PAYLOAD]).toEqual(tokenPayload);
     });
 
@@ -137,7 +136,7 @@ describe('AuthTokenGuard', () => {
         expect(e.message).toBe('Usuário não logado');
       }
 
-      expect(authService.isAuthorized).not.toHaveBeenCalled();
+      expect(authService.getTokenPayload).not.toHaveBeenCalled();
     });
 
     it('should throw Custom Exception when authorization header is malformed', async () => {
@@ -150,7 +149,7 @@ describe('AuthTokenGuard', () => {
         expect(e.message).toBe('Usuário não logado');
       }
 
-      expect(authService.isAuthorized).not.toHaveBeenCalled();
+      expect(authService.getTokenPayload).not.toHaveBeenCalled();
     });
 
     it('should throw Custom Exception when token is empty string', async () => {
@@ -163,7 +162,7 @@ describe('AuthTokenGuard', () => {
         expect(e.message).toBe('Usuário não logado');
       }
 
-      expect(authService.isAuthorized).not.toHaveBeenCalled();
+      expect(authService.getTokenPayload).not.toHaveBeenCalled();
     });
 
     it('should throw Custom Exception when unauthorized', async () => {
@@ -172,7 +171,7 @@ describe('AuthTokenGuard', () => {
       mockRequest.headers = { authorization: `Bearer ${mockToken}` };
 
       jest
-        .spyOn(authService, 'isAuthorized')
+        .spyOn(authService, 'getTokenPayload')
         .mockRejectedValue(new CustomException('Não autorizado', UNAUTHORIZED));
 
       try {
@@ -182,7 +181,7 @@ describe('AuthTokenGuard', () => {
         expect(e.message).toBe('Não autorizado');
       }
 
-      expect(authService.isAuthorized).toHaveBeenCalledWith(mockToken);
+      expect(authService.getTokenPayload).toHaveBeenCalledWith(mockToken);
       expect(mockRequest[REQUEST_TOKEN_PAYLOAD]).toBeUndefined();
     });
   });

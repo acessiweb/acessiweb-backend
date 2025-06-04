@@ -9,7 +9,6 @@ import { Auth } from './entities/auth.entity';
 import { CryptoService } from 'src/common/encription/crypto.service';
 import jwtConfig from './config/jwt.config';
 import { JwtModule } from '@nestjs/jwt';
-import { JwtHelpers } from './helpers/auth-jwt.helper';
 
 @Global()
 @Module({
@@ -26,7 +25,6 @@ import { JwtHelpers } from './helpers/auth-jwt.helper';
     },
     AuthService,
     CryptoService,
-    JwtHelpers,
   ],
   exports: [
     HashingService,
@@ -34,7 +32,6 @@ import { JwtHelpers } from './helpers/auth-jwt.helper';
     TypeOrmModule,
     JwtModule,
     ConfigModule,
-    JwtHelpers,
   ],
 })
 export class AuthModule {}
