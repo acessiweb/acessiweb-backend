@@ -80,34 +80,55 @@ export class CommonUserService {
 
   async update(id: string, updateCommonUserDto: UpdateCommonUserDto) {
     await this.findOneBy(id);
+
+    const updated = await this.commonUserRepo.update(id, updateCommonUserDto);
+
+    if (updated.affected > 0) {
+      const { username } = updated.raw[0];
+
+      return { id, username };
+    }
+
+    throw new CustomException(
+      `Não foi possível atualizar usuário id ${id}`,
+      UPDATE_OPERATION_FAILED,
+      [],
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+  }
+
+  async delete(id: string) {
+    //TODO: testar
+    await this.findOneBy(id);
+
     try {
-      return await this.commonUserRepo.update(id, updateCommonUserDto);
+      return await this.dataSource.manager.transaction(
+        async (transactionalEntityManager) => {
+          const deletedUser = await transactionalEntityManager.softDelete(
+            'CommonUser',
+            id,
+          );
+
+          const auth = await this.authService.findOne({ userId: id });
+
+          await transactionalEntityManager.softDelete('Auth', auth.id);
+
+          if (deletedUser.affected > 0) {
+            return {
+              id,
+            };
+          }
+
+          throw new Error();
+        },
+      );
     } catch (e) {
       throw new CustomException(
-        `Não foi possível atualizar usuário id ${id}`,
-        UPDATE_OPERATION_FAILED,
+        `Não foi possível deletar usuário id ${id}`,
+        DELETE_OPERATION_FAILED,
         [],
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-  }
-
-  async delete(id: string) {
-    // aqui tem que chamar auth delete
-    await this.findOneBy(id);
-    const deleted = await this.commonUserRepo.delete(id);
-
-    if (deleted.affected > 0) {
-      return {
-        id,
-      };
-    }
-
-    throw new CustomException(
-      `Não foi possível deletar usuário id ${id}`,
-      DELETE_OPERATION_FAILED,
-      [],
-      HttpStatus.INTERNAL_SERVER_ERROR,
-    );
   }
 }

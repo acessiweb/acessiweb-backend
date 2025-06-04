@@ -55,6 +55,9 @@ describe('CommonUserController (unit)', () => {
 
       const result = await controller.create(createCommonUserDto);
 
+      expect(commonUserServiceMock.useValue.create).toHaveBeenCalledWith(
+        createCommonUserDto,
+      );
       expect(result).toMatchObject({ id: COMMON_USER_ID_CREATED_MOCK });
     });
 
@@ -87,6 +90,10 @@ describe('CommonUserController (unit)', () => {
         id: commonUsersMock[0].id,
         username: updateCommonUserDto.username,
       } as CommonUser);
+      expect(commonUserServiceMock.useValue.update).toHaveBeenCalledWith(
+        commonUsersMock[0].id,
+        updateCommonUserDto,
+      );
     });
 
     it('should throw Http Custom Exception error', async () => {
@@ -111,6 +118,9 @@ describe('CommonUserController (unit)', () => {
       expect(response).toEqual({
         id: commonUsersMock[0].id,
       });
+      expect(commonUserServiceMock.useValue.delete).toHaveBeenCalledWith(
+        commonUsersMock[0].id,
+      );
     });
 
     it('should throw Http Custom Exception error', async () => {
@@ -131,6 +141,9 @@ describe('CommonUserController (unit)', () => {
     it('should return user if found', async () => {
       const response = await controller.findOneBy(commonUsersMock[0].id);
       expect(response).toEqual(commonUsersMock[0]);
+      expect(commonUserServiceMock.useValue.findOneBy).toHaveBeenCalledWith(
+        commonUsersMock[0].id,
+      );
     });
 
     it('should throw Http Custom Exception error', async () => {

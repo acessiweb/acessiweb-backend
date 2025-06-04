@@ -69,6 +69,10 @@ describe('CommonUsersProjectsController (unit)', () => {
         createCommonUserProjectDto,
       );
 
+      expect(projectServiceMock.useValue.create).toHaveBeenCalledWith({
+        ...createCommonUserProjectDto,
+        userId: commonUsersMock[0].id,
+      });
       expect(result).toMatchObject({ id: PROJECT_ID_CREATED_MOCK });
     });
 
@@ -96,6 +100,10 @@ describe('CommonUsersProjectsController (unit)', () => {
         updateProjectDto,
       );
 
+      expect(projectServiceMock.useValue.update).toHaveBeenCalledWith(
+        PROJECT_ID_UPDATED_MOCK,
+        updateProjectDto,
+      );
       expect(result).toStrictEqual({
         name: updateProjectDto.name,
         guidelines: [guidelinesMock[0]],
@@ -145,6 +153,9 @@ describe('CommonUsersProjectsController (unit)', () => {
 
       const deleted = await controller.delete(projectsMock[0].id);
       expect(deleted).toStrictEqual(mockResult);
+      expect(projectServiceMock.useValue.delete).toHaveBeenCalledWith(
+        projectsMock[0].id,
+      );
     });
   });
 
@@ -159,6 +170,9 @@ describe('CommonUsersProjectsController (unit)', () => {
 
     it('should return project if found', async () => {
       const project = await controller.findOne(projectsMock[0].id);
+      expect(projectServiceMock.useValue.findOne).toHaveBeenCalledWith(
+        projectsMock[0].id,
+      );
       expect(project).toEqual(projectsMock[0]);
     });
   });
@@ -175,6 +189,11 @@ describe('CommonUsersProjectsController (unit)', () => {
         pagination,
       );
 
+      expect(projectServiceMock.useValue.findAll).toHaveBeenCalledWith({
+        limit: pagination.limit,
+        offset: pagination.offset,
+        commonUserId: commonUsersMock[0].id,
+      });
       expect(projects).toStrictEqual(projectsMock);
     });
   });

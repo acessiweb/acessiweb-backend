@@ -19,8 +19,8 @@ export class ProjectsRepository {
     projFeedback: string,
     guidesToAdd: string[],
     guidesToRemove: string[],
-  ): Promise<Project> {
-    await Promise.all([
+  ): Promise<[UpdateResult, void, void]> {
+    return await Promise.all([
       this.projectRepository.update(id, {
         name: projName,
         description: projDesc,
@@ -37,8 +37,6 @@ export class ProjectsRepository {
         .of(id)
         .remove(guidesToRemove),
     ]);
-
-    return await this.findOne(id);
   }
 
   async delete(id: string): Promise<UpdateResult> {

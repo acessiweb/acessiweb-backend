@@ -14,6 +14,7 @@ import { CreateProjectDto } from './dto/create-project.dto';
 import { ProjectsRepository } from './projects.repository';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { RESOURCE_NOT_FOUND } from 'src/common/errors/errors-codes';
+import { getIdsToAdd, getIdsToRemove } from 'src/common/utils/filter';
 
 describe('ProjectsService (unit)', () => {
   let service: ProjectsService;
@@ -98,8 +99,12 @@ describe('ProjectsService (unit)', () => {
         expect(e).toBeInstanceOf(CustomException);
       }
 
-      expect(commonUserServiceMock.useValue.findOneBy).toHaveBeenCalled();
-      expect(service.getSanitizedArrayOfIds).toHaveBeenCalled();
+      expect(commonUserServiceMock.useValue.findOneBy).toHaveBeenCalledWith(
+        createProjectDto.userId,
+      );
+      expect(service.getSanitizedArrayOfIds).toHaveBeenCalledWith(
+        createProjectDto.guidelines,
+      );
       expect(repo.create).not.toHaveBeenCalled();
     });
 
@@ -121,8 +126,12 @@ describe('ProjectsService (unit)', () => {
         );
       }
 
-      expect(commonUserServiceMock.useValue.findOneBy).toHaveBeenCalled();
-      expect(service.getSanitizedArrayOfIds).toHaveBeenCalled();
+      expect(commonUserServiceMock.useValue.findOneBy).toHaveBeenCalledWith(
+        createProjectDto.userId,
+      );
+      expect(service.getSanitizedArrayOfIds).toHaveBeenCalledWith(
+        createProjectDto.guidelines,
+      );
       expect(repo.create).not.toHaveBeenCalled();
     });
 
@@ -146,10 +155,13 @@ describe('ProjectsService (unit)', () => {
 
       const response = await service.create(createProjectDto);
 
-      expect(commonUserServiceMock.useValue.findOneBy).toHaveBeenCalled();
-      expect(service.getSanitizedArrayOfIds).toHaveBeenCalled();
+      expect(commonUserServiceMock.useValue.findOneBy).toHaveBeenCalledWith(
+        createProjectDto.userId,
+      );
+      expect(service.getSanitizedArrayOfIds).toHaveBeenCalledWith(
+        createProjectDto.guidelines,
+      );
       expect(response).toStrictEqual(mockResult);
-      expect(repo.create).toHaveBeenCalled();
       expect(repo.create).toHaveBeenCalledWith(expect.any(Project));
       await expect(projectSaved.mock.results[0].value).resolves.toStrictEqual(
         mockResult,
@@ -178,7 +190,7 @@ describe('ProjectsService (unit)', () => {
         expect(e).toBeInstanceOf(CustomException);
       }
 
-      expect(service.findOne).toHaveBeenCalled();
+      expect(service.findOne).toHaveBeenCalledWith(projId);
       expect(repo.update).not.toHaveBeenCalled();
     });
 
@@ -202,11 +214,19 @@ describe('ProjectsService (unit)', () => {
       mockResult.name = updateProjectDto.name;
       mockResult.guidelines = [guidelinesMock[1]];
 
-      jest.spyOn(repo, 'update').mockResolvedValue(mockResult);
+      jest.spyOn(repo, 'update').mockResolvedValue([
+        {
+          raw: [mockResult],
+          affected: 1,
+          generatedMaps: [],
+        },
+        null,
+        null,
+      ]);
 
       const projUpdated = await service.update(projectId, updateProjectDto);
 
-      expect(service.findOne).toHaveBeenCalled();
+      expect(service.findOne).toHaveBeenCalledWith(projectId);
       expect(projUpdated.name).toBe(updateProjectDto.name);
       expect(projUpdated.guidelines).toEqual(
         expect.arrayContaining([guidelinesMock[1]]),
@@ -228,7 +248,8 @@ describe('ProjectsService (unit)', () => {
 
       const projDeleted = await service.delete(projectId);
 
-      expect(service.findOne).toHaveBeenCalled();
+      expect(service.findOne).toHaveBeenCalledWith(projectId);
+      expect(repo.delete).toHaveBeenCalledWith(projectId);
       expect(projDeleted).toStrictEqual(mockResult);
     });
 
@@ -251,7 +272,7 @@ describe('ProjectsService (unit)', () => {
         );
       }
 
-      expect(service.findOne).toHaveBeenCalled();
+      expect(service.findOne).toHaveBeenCalledWith(projectId);
     });
 
     it('should not call projRepo.delete if project does not exist', async () => {
@@ -272,7 +293,7 @@ describe('ProjectsService (unit)', () => {
         expect(e).toBeInstanceOf(CustomException);
       }
 
-      expect(service.findOne).toHaveBeenCalled();
+      expect(service.findOne).toHaveBeenCalledWith(projId);
       expect(repo.delete).not.toHaveBeenCalled();
     });
   });
@@ -287,6 +308,7 @@ describe('ProjectsService (unit)', () => {
 
       const project = await service.findOne(projectId);
 
+      expect(repo.findOne).toHaveBeenCalledWith(projectId);
       expect(project).toStrictEqual(mockResult);
     });
 
@@ -308,6 +330,8 @@ describe('ProjectsService (unit)', () => {
         expect(e).toBeInstanceOf(CustomException);
         expect(e.message).toBe(`Projeto com id ${projId} não encontrado`);
       }
+
+      expect(repo.findOne).toHaveBeenCalledWith(projId);
     });
   });
 });

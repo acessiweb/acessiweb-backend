@@ -14,18 +14,14 @@ export class CommonUsersRepository {
   async update(
     id: string,
     updateCommonUserDto: UpdateCommonUserDto,
-  ): Promise<{ id: string; username: string }> {
-    const updated = await this.commonUserRepository
+  ): Promise<UpdateResult> {
+    return await this.commonUserRepository
       .createQueryBuilder()
       .update(CommonUser)
       .set(updateCommonUserDto)
       .where('id = :id', { id: id })
       .returning(['username'])
       .execute();
-
-    const { username } = updated.raw[0];
-
-    return { id, username };
   }
 
   async delete(id: string): Promise<UpdateResult> {

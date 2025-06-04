@@ -12,12 +12,12 @@ export class CryptoService {
   keyLength = 32;
   ivLength = 16;
 
-  toHash(value: string) {
+  toHash(value: string): string {
     const hashCopy = this.hash.copy();
     return hashCopy.update(value.trim().toLowerCase()).digest('base64');
   }
 
-  encrypt(value: string) {
+  encrypt(value: string): string {
     const iv = randomBytes(this.ivLength);
     const key = scryptSync(process.env.CRYPTO_PASSWORD, 'salt', this.keyLength);
 
@@ -30,7 +30,7 @@ export class CryptoService {
     return `${iv.toString('base64')}:${encrypted.toString('base64')}`;
   }
 
-  decrypt(value: string) {
+  decrypt(value: string): string {
     const [ivBase64, encryptedBase64] = value.split(':');
     const iv = Buffer.from(ivBase64, 'base64');
     const content = Buffer.from(encryptedBase64, 'base64');

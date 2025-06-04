@@ -8,6 +8,7 @@ import {
   DELETE_OPERATION_FAILED,
   REQUIRED_FIELD,
   RESOURCE_NOT_FOUND,
+  UPDATE_OPERATION_FAILED,
 } from 'src/common/errors/errors-codes';
 import CustomException from 'src/common/exceptions/custom-exception.exception';
 import { ProjectsRepository } from './projects.repository';
@@ -44,7 +45,7 @@ export class ProjectsService {
 
     if (guidelines.length === 0) {
       throw new CustomException(
-        'O projeto precisa ter ao menos uma diretriz relacionada',
+        'O projeto precisa ter ao menos uma diretriz válida relacionada',
         REQUIRED_FIELD,
         ['guidelines'],
         HttpStatus.BAD_REQUEST,
@@ -68,13 +69,26 @@ export class ProjectsService {
     const project = await this.findOne(id);
     const currentIds = project.guidelines.map((guide) => guide.id);
 
-    return await this.projRepo.update(
+    const [updated] = await this.projRepo.update(
       id,
       updateProjectDto.name,
       updateProjectDto.desc,
       updateProjectDto.feedback,
       getIdsToAdd(currentIds, updateProjectDto.guidelines),
       getIdsToRemove(currentIds, updateProjectDto.guidelines),
+    );
+
+    const updatedProj = await this.findOne(id);
+
+    if (updated.affected > 0 || project.guidelines !== updatedProj.guidelines) {
+      return await this.findOne(id);
+    }
+
+    throw new CustomException(
+      `Não foi possível atualizar projeto id ${id}`,
+      UPDATE_OPERATION_FAILED,
+      [],
+      HttpStatus.INTERNAL_SERVER_ERROR,
     );
   }
 

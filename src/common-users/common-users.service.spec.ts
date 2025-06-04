@@ -13,6 +13,7 @@ import {
   RESOURCE_NOT_FOUND,
   UPDATE_OPERATION_FAILED,
 } from 'src/common/errors/errors-codes';
+import { HttpStatus } from '@nestjs/common';
 
 describe('CommonUsersService (unit)', () => {
   let service: CommonUserService;
@@ -89,6 +90,18 @@ describe('CommonUsersService (unit)', () => {
 
       const response = await service.create(createCommonUserDto);
       expect(authService.create).toHaveBeenCalled();
+      expect(authService.create).toHaveBeenCalledWith(
+        {
+          email: createCommonUserDto.email,
+          mobilePhone: createCommonUserDto.mobilePhone,
+          password: createCommonUserDto.password,
+          confirmPassword: createCommonUserDto.confirmPassword,
+        },
+        {
+          id: commonUserId,
+          username: createCommonUserDto.username,
+        } as CommonUser,
+      );
       expect(response).toEqual({ id: commonUserId });
     });
 
@@ -169,13 +182,20 @@ describe('CommonUsersService (unit)', () => {
       jest.spyOn(service, 'findOneBy').mockResolvedValue(mockResult);
 
       jest.spyOn(repo, 'update').mockResolvedValue({
-        id: userId,
-        username: updateCommonUserDto.username,
+        raw: [
+          {
+            id: userId,
+            username: updateCommonUserDto.username,
+          },
+        ],
+        affected: 1,
+        generatedMaps: [],
       });
 
       const response = await service.update(userId, updateCommonUserDto);
 
       expect(service.findOneBy).toHaveBeenCalled();
+      expect(repo.update).toHaveBeenCalledWith(userId, updateCommonUserDto);
       expect(response).toEqual({
         id: userId,
         username: updateCommonUserDto.username,
@@ -187,6 +207,13 @@ describe('CommonUsersService (unit)', () => {
       const updateCommonUserDto = new UpdateCommonUserDto();
       updateCommonUserDto.username = 'laura123';
 
+      const exception = new CustomException(
+        `Não foi possível atualizar usuário id ${userId}`,
+        UPDATE_OPERATION_FAILED,
+        [],
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+
       const mockResult = {
         id: userId,
         username: 'laura',
@@ -194,18 +221,15 @@ describe('CommonUsersService (unit)', () => {
 
       jest.spyOn(service, 'findOneBy').mockResolvedValue(mockResult);
 
-      jest
-        .spyOn(repo, 'update')
-        .mockRejectedValue(new Error('Aconteceu um erro'));
+      jest.spyOn(repo, 'update').mockRejectedValue(exception);
 
       try {
         await service.update(userId, updateCommonUserDto);
       } catch (e) {
         expect(e).toBeInstanceOf(CustomException);
-        expect(e.message).toBe(
-          `Não foi possível atualizar usuário id ${userId}`,
-        );
+        expect(e.message).toBe(exception.message);
         expect(e.errorCode).toBe(UPDATE_OPERATION_FAILED);
+        expect(e.httpErrorCode).toBe(exception.httpErrorCode);
       }
 
       expect(service.findOneBy).toHaveBeenCalled();
@@ -235,6 +259,7 @@ describe('CommonUsersService (unit)', () => {
       expect(response).toEqual({
         id: userId,
       });
+      expect(repo.delete).toHaveBeenCalledWith(userId);
     });
 
     it('should throw Custom Exception if failed deletion', async () => {
@@ -278,6 +303,7 @@ describe('CommonUsersService (unit)', () => {
       const response = await service.findOneBy(userId);
 
       expect(response).toEqual(mockResult);
+      expect(repo.findOneBy).toHaveBeenCalledWith(userId);
     });
 
     it('should throw Custom Exception if user not found', async () => {
