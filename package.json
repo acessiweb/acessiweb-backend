@@ -86,7 +86,10 @@
       "^src/(.*)$": "<rootDir>/src/$1",
       "^test/(.*)$": "<rootDir>/test/$1"
     },
-    "testTimeout": 120000
+    "testTimeout": 120000,
+    "setupFiles": [
+      "<rootDir>/jest.env.ts"
+    ]
   },
   "_moduleAliases": {
     "src": "dist/src"
