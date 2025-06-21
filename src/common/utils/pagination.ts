@@ -4,7 +4,7 @@ export function getPagination(
   total: number,
 ): PartialPaginationResponse {
   const totalPages = Math.ceil(total / limit);
-  let newOffset = offset + limit + 1;
+  let newOffset = offset + limit;
   let hasPrev = false;
   let hasNext = true;
 

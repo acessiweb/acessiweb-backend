@@ -4,23 +4,22 @@ import {
   Check,
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinTable,
   ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
-  Unique,
   UpdateDateColumn,
 } from 'typeorm';
 
 @Check(`UPPER("statusCode") IN ('APPROVED', 'PENDING', 'REJECTED', 'DELETED')`)
-@Unique(['name'])
 @Entity()
 export class Guideline {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'varchar', length: 150, nullable: false })
+  @Column({ type: 'varchar', length: 150, nullable: false, unique: true })
   name: string;
 
   @Column({ type: 'text', nullable: false })
@@ -64,4 +63,7 @@ export class Guideline {
     nullable: false,
   })
   updatedAt: Date;
+
+  @DeleteDateColumn({ type: 'timestamp without time zone', nullable: true })
+  deletedAt: Date;
 }

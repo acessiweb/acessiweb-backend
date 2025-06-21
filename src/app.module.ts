@@ -5,7 +5,11 @@ import { CommonUserModule } from './common-users/common-users.module';
 import { DeficiencesModule } from './deficiences/deficiences.module';
 import { GuidelinesModule } from './guidelines/guidelines.module';
 import { ProjectsModule } from './projects/projects.module';
-import { CommonUsersProjectsModule } from './common-users-projects/common-users-projects.module';
+import { CommonUsersProjectsModule } from './common-users/common-users-projects.module';
+import { UsersModule } from './users/users.module';
+import { UsersGuidelinesModule } from './users/users-guidelines.module';
+import { InitModule } from './init.module';
+import { ImageKitModule } from './imagekit/imagekit.module';
 
 @Module({
   imports: [
@@ -27,6 +31,10 @@ import { CommonUsersProjectsModule } from './common-users-projects/common-users-
     GuidelinesModule,
     ProjectsModule,
     CommonUsersProjectsModule,
+    UsersModule,
+    UsersGuidelinesModule,
+    InitModule,
+    ImageKitModule,
   ],
 })
 export class AppModule {}

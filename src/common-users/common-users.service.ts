@@ -61,6 +61,7 @@ export class CommonUserService {
 
           return {
             id: user.id,
+            role: user.role,
           };
         },
       );

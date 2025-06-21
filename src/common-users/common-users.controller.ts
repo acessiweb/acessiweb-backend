@@ -7,6 +7,7 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { CommonUserService } from './common-users.service';
@@ -22,19 +23,6 @@ import { RoutePolicyGuard } from 'src/auth/guards/route-policy.guard';
 @Controller('common-users')
 export class CommonUserController {
   constructor(private readonly commonUsersService: CommonUserService) {}
-
-  @SetRoutePolicy(RoutePolicies.user)
-  @UseGuards(AuthTokenGuard, RoutePolicyGuard)
-  @Get(':cuid')
-  async findOneBy(@Param('cuid', ParseUUIDPipe) cuid: string) {
-    try {
-      return await this.commonUsersService.findOneBy(cuid);
-    } catch (e) {
-      if (e instanceof CustomException) {
-        throwHttpException(e);
-      }
-    }
-  }
 
   @Post()
   async create(@Body() createCommonUserDto: CreateCommonUserDto) {

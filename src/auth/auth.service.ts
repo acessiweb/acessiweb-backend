@@ -97,7 +97,7 @@ export class AuthService {
 
     const isPasswordValid = await this.hashingService.compare(
       loginDto.password,
-      auth ? auth.password : '',
+      auth ? auth.password.toString() : '',
     );
 
     if (!auth || !isPasswordValid) {
@@ -144,7 +144,11 @@ export class AuthService {
       this.throwEmailOrMobilePhoneEmpty();
     }
 
-    if (createAuthDto.password !== createAuthDto.confirmPassword) {
+    if (
+      createAuthDto.password &&
+      createAuthDto.confirmPassword &&
+      createAuthDto.password !== createAuthDto.confirmPassword
+    ) {
       this.throwPasswordsMismatch(['password', 'confirmPassword']);
     }
 
@@ -164,7 +168,9 @@ export class AuthService {
       auth.mobilePhoneHash = mobilePhoneHash;
     }
 
-    auth.password = await this.hashingService.hash(createAuthDto.password);
+    if (createAuthDto.password) {
+      auth.password = await this.hashingService.hash(createAuthDto.password);
+    }
 
     auth.user = user;
 

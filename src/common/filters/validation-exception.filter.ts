@@ -62,7 +62,7 @@ export class ValidationExceptionFilter implements ExceptionFilter {
             validationErrors.push(
               new CustomException(value, MAX_LENGTH_EXCEEDED, [err.property]),
             );
-          } else if (key === 'matches') {
+          } else if (key === 'matches' || key === 'isEmail') {
             validationErrors.push(
               new CustomException(value, INVALID_DATA, [err.property]),
             );
@@ -73,7 +73,7 @@ export class ValidationExceptionFilter implements ExceptionFilter {
       response.status(400).json({
         statusCode: 400,
         message: 'Validation failed',
-        validationErrors,
+        errors: validationErrors,
       });
     }
   }
