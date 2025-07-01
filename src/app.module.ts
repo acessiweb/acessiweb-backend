@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CommonUserModule } from './common-users/common-users.module';
 import { DeficiencesModule } from './deficiences/deficiences.module';
 import { GuidelinesModule } from './guidelines/guidelines.module';
@@ -13,18 +13,20 @@ import { ImageKitModule } from './imagekit/imagekit.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      envFilePath: ['.env.local'],
-    }),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DB_HOST,
-      port: 5432,
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB,
-      synchronize: false, // true = shouldn't be used in production - otherwise you can lose production data
-      autoLoadEntities: true,
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env'] }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get<string>('DATABASE_HOST'),
+        port: configService.get<number>('DATABASE_PORT'),
+        username: configService.get<string>('DATABASE_USERNAME'),
+        password: configService.get<string>('DATABASE_PASSWORD'),
+        database: configService.get<string>('DATABASE_NAME'),
+        autoLoadEntities: true,
+        synchronize: false, // true = shouldn't be used in production - otherwise you can lose production data
+      }),
+      inject: [ConfigService],
     }),
     CommonUserModule,
     DeficiencesModule,
