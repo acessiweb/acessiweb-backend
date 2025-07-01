@@ -31,6 +31,9 @@ export class Guideline {
   @Column({ type: 'varchar', length: 500, nullable: true })
   image: string;
 
+  @Column({ type: 'varchar', nullable: true })
+  imageId: string;
+
   @Column({ type: 'varchar', length: 250, nullable: true })
   imageDesc: string;
 

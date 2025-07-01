@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { FindOperator, ILike, Repository } from 'typeorm';
 import { Deficiency } from './entities/deficiences.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import CustomException from 'src/common/exceptions/custom-exception.exception';
@@ -19,14 +19,17 @@ export class DeficiencesService {
     id?: string;
     name?: string;
   }): Promise<Deficiency> {
-    const q = {};
+    const q = {} as {
+      id?: string;
+      name?: FindOperator<string>;
+    };
 
     if (id) {
       q['id'] = id;
     }
 
     if (name) {
-      q['name'] = name;
+      q['name'] = ILike(`%${name.toLowerCase()}%`);
     }
 
     const deficiency = await this.deficiencyRepository.findOneBy(q);

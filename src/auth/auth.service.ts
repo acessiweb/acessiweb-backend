@@ -40,8 +40,14 @@ export class AuthService {
     email?: string;
     mobilePhone?: string;
     userId?: string;
-  }): Promise<Auth> {
-    const query = {} as typeof where;
+  }): Promise<Auth | null> {
+    const query = {} as {
+      emailHash?: string;
+      mobilePhoneHash?: string;
+      user?: {
+        id: string;
+      };
+    };
 
     if (where.email) {
       query['emailHash'] = this.cryptoService.toHash(where.email);
@@ -193,8 +199,8 @@ export class AuthService {
       );
     }
 
-    const emailHash = this.cryptoService.toHash(updateEmailDto.email);
-    const emailEncrypt = this.cryptoService.encrypt(updateEmailDto.email);
+    const emailHash = this.cryptoService.toHash(updateEmailDto.email!);
+    const emailEncrypt = this.cryptoService.encrypt(updateEmailDto.email!);
 
     const emailUpdated = await this.authRepository
       .createQueryBuilder()
@@ -207,7 +213,7 @@ export class AuthService {
       .returning(['email'])
       .execute();
 
-    if (emailUpdated.affected > 0) {
+    if (emailUpdated.affected && emailUpdated.affected > 0) {
       const { email } = emailUpdated.raw[0];
 
       return {
@@ -238,10 +244,10 @@ export class AuthService {
     }
 
     const mobilePhoneHash = this.cryptoService.toHash(
-      updateMobilePhoneDto.mobilePhone,
+      updateMobilePhoneDto.mobilePhone!,
     );
     const mobilePhoneEncrypt = this.cryptoService.encrypt(
-      updateMobilePhoneDto.mobilePhone,
+      updateMobilePhoneDto.mobilePhone!,
     );
 
     const mobilePhoneUpdated = await this.authRepository
@@ -255,7 +261,7 @@ export class AuthService {
       .returning(['mobilePhone'])
       .execute();
 
-    if (mobilePhoneUpdated.affected > 0) {
+    if (mobilePhoneUpdated.affected && mobilePhoneUpdated.affected > 0) {
       const { mobilePhone } = mobilePhoneUpdated.raw[0];
 
       return {
@@ -317,7 +323,7 @@ export class AuthService {
       password: hashedPassword,
     });
 
-    if (updated.affected > 0) {
+    if (updated.affected && updated.affected > 0) {
       return {
         success: true,
       };
@@ -353,13 +359,11 @@ export class AuthService {
     );
 
     if (tokenPayload.email) {
-      tokenPayload['email'] = this.cryptoService.decrypt(tokenPayload.email);
+      tokenPayload['email'] = tokenPayload.email;
     }
 
     if (tokenPayload.mobilePhone) {
-      tokenPayload['mobilePhone'] = this.cryptoService.decrypt(
-        tokenPayload.mobilePhone,
-      );
+      tokenPayload['mobilePhone'] = tokenPayload.mobilePhone;
     }
 
     return tokenPayload;
@@ -371,8 +375,10 @@ export class AuthService {
   }> {
     const jwtPayload = {} as JwtPayload;
 
-    if (auth.email) jwtPayload['email'] = auth.email;
-    if (auth.mobilePhone) jwtPayload['mobilePhone'] = auth.mobilePhone;
+    if (auth.email)
+      jwtPayload['email'] = this.cryptoService.decrypt(auth.email);
+    if (auth.mobilePhone)
+      jwtPayload['mobilePhone'] = this.cryptoService.decrypt(auth.mobilePhone);
 
     jwtPayload['role'] = auth.user.role;
 

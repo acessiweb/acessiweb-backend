@@ -9,9 +9,7 @@ export class GuidelinesController {
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    try {
-      return await this.guidelinesService.findOne(id);
-    } catch (e) {}
+    return await this.guidelinesService.findOne(id);
   }
 
   @Get()

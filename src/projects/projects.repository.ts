@@ -43,7 +43,7 @@ export class ProjectsRepository {
     return await this.projectRepository.softDelete(id);
   }
 
-  async findOne(id: string): Promise<Project> {
+  async findOne(id: string): Promise<Project | null> {
     return await this.projectRepository.findOne({
       where: { id },
       relations: {

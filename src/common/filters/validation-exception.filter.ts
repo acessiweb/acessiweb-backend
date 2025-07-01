@@ -42,10 +42,10 @@ export class ValidationExceptionFilter implements ExceptionFilter {
     }
 
     if (isArray(errorResponse.message)) {
-      const validationErrors = [];
+      const validationErrors = [] as CustomException[];
 
       errorResponse.message.map((err: ValidationError) => {
-        const msgsCodes = Object.entries(err.constraints);
+        const msgsCodes = Object.entries(err.constraints!);
 
         console.log(msgsCodes);
 

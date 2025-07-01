@@ -11,9 +11,9 @@ import ImageKit from 'imagekit';
       provide: 'IMAGEKIT_SERVICE',
       useFactory: (configService: ConfigService) => {
         return new ImageKit({
-          publicKey: configService.get<string>('imagekit.publicKey'),
-          privateKey: configService.get<string>('imagekit.privateKey'),
-          urlEndpoint: configService.get<string>('imagekit.urlEndpoint'),
+          publicKey: configService.get<string>('imagekit.publicKey')!,
+          privateKey: configService.get<string>('imagekit.privateKey')!,
+          urlEndpoint: configService.get<string>('imagekit.urlEndpoint')!,
         });
       },
       inject: [ConfigService],

@@ -91,6 +91,10 @@
     "testTimeout": 120000,
     "setupFiles": [
       "<rootDir>/jest.env.ts"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/dist/"
     ]
   },
   "_moduleAliases": {

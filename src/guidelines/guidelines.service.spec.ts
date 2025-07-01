@@ -377,7 +377,6 @@ describe('GuidelinesService (unit)', () => {
       try {
         await service.delete(guideId, tokenPayload);
       } catch (e) {
-        console.log(e);
         expect(e).toBeInstanceOf(CustomException);
         expect(e.message).toBe(
           `A solicitação não pode ser deletada pois ela está com status APROVADA`,

@@ -6,10 +6,8 @@ import {
   MaxLength,
 } from 'class-validator';
 import { PASSWORD_MASK, PASSWORD_VALIDATION_MSG } from '../auth.constants';
-import { Transform } from 'class-transformer';
 
 export class CreateAuthDto {
-  @Transform(({ value }) => (value === '' ? undefined : value))
   @IsOptional()
   @IsEmail(
     {},
@@ -20,7 +18,6 @@ export class CreateAuthDto {
   @MaxLength(512, { message: 'Email deve possuir no máximo 512 caracteres' })
   email?: string;
 
-  @Transform(({ value }) => (value === '' ? undefined : value))
   @IsOptional()
   @IsMobilePhone('pt-BR', {}, { message: 'Número de celular inválido' })
   mobilePhone?: string;

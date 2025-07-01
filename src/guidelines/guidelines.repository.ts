@@ -55,6 +55,7 @@ export class GuidelinesRepository {
     guideDesc: string,
     guideCode: string,
     guideImage: string,
+    guideImageId: string,
     guideImageDesc: string,
     deficiencesToAdd: string[],
     deficiencesToRemove: string[],
@@ -83,11 +84,21 @@ export class GuidelinesRepository {
       }
     };
 
-    const dataToUpdate = {
+    const dataToUpdate: {
+      name: string;
+      description: string;
+      code: string;
+      image: string;
+      imageId: string;
+      imageDesc: string;
+      guideStatusCode?: string;
+      guideStatusMsg?: string;
+    } = {
       name: guideName,
       description: guideDesc,
       code: guideCode,
       image: guideImage,
+      imageId: guideImageId,
       imageDesc: guideImageDesc,
     };
 
@@ -138,7 +149,7 @@ export class GuidelinesRepository {
     return await this.guidelineRepository.softDelete(id);
   }
 
-  async findOne(id: string): Promise<Guideline> {
+  async findOne(id: string): Promise<Guideline | null> {
     return this.guidelineRepository.findOne({
       where: { id },
       relations: {

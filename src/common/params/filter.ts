@@ -10,7 +10,7 @@ export type FilterParams = {
 };
 
 export const Filter = createParamDecorator(
-  (data: unknown, ctx: ExecutionContext) => {
+  (_data: unknown, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest();
 
     const {

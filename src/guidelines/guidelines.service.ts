@@ -16,6 +16,7 @@ import { TokenPayloadDto } from 'src/auth/dto/token-payload.dto';
 import { ACCESS_ADMIN, ACCESS_USER } from 'src/common/constants/access';
 import { getIdsToAdd, getIdsToRemove } from 'src/common/utils/filter';
 import { ImageKitService } from 'src/imagekit/imagekit.service';
+import { UploadResponse } from 'imagekit/dist/libs/interfaces';
 
 @Injectable()
 export class GuidelinesService {
@@ -32,13 +33,15 @@ export class GuidelinesService {
     const data = [];
 
     for (let rd of removedDuplicate) {
-      try {
-        const found = await this.deficiencesService.findOneBy({
-          name: rd,
-        });
-        data.push(found);
-      } catch (e) {
-        console.log(e);
+      if (rd) {
+        try {
+          const found = await this.deficiencesService.findOneBy({
+            name: rd,
+          });
+          data.push(found);
+        } catch (e) {
+          console.log(e);
+        }
       }
     }
 
@@ -57,18 +60,17 @@ export class GuidelinesService {
   async create(
     createGuidelineDto: CreateGuidelineDto,
     image: Express.Multer.File,
-    tokenPayload: TokenPayloadDto,
   ) {
     if (image && !createGuidelineDto.imageDesc) {
       this.throwImageDescNotInformed();
     }
 
-    const [user, deficiencies] = await Promise.all([
+    const [user, deficiences] = await Promise.all([
       this.usersService.findOneBy(createGuidelineDto.userId),
       this.getSanitizedArrayOfIds(createGuidelineDto.deficiences),
     ]);
 
-    if (deficiencies.length === 0) {
+    if (deficiences.length === 0) {
       throw new CustomException(
         'A diretriz precisa ter ao menos uma deficiência válida relacionada',
         REQUIRED_FIELD,
@@ -80,7 +82,7 @@ export class GuidelinesService {
     const guideline = new Guideline();
     guideline.name = createGuidelineDto.name;
     guideline.description = createGuidelineDto.desc;
-    guideline.code = createGuidelineDto.code;
+    guideline.code = createGuidelineDto.code!;
 
     if (image) {
       try {
@@ -94,9 +96,10 @@ export class GuidelinesService {
         console.log(e);
       }
     }
-    guideline.imageDesc = createGuidelineDto.imageDesc;
+
+    guideline.imageDesc = createGuidelineDto.imageDesc!;
     guideline.user = user;
-    guideline.deficiences = deficiencies;
+    guideline.deficiences = deficiences;
 
     if (user.role === 'user') {
       guideline.statusCode = 'PENDING';
@@ -134,13 +137,28 @@ export class GuidelinesService {
 
     const currentIds = guideline.deficiences.map((def) => def.id);
 
+    let uploadRes: UploadResponse = {} as UploadResponse;
+
+    if (image) {
+      try {
+        await this.imageKitService.deleteImage(updateGuidelineDto.imageId!);
+      } catch (e) {}
+
+      try {
+        uploadRes = await this.imageKitService.uploadImage(image, 'guidelines');
+      } catch (e) {
+        console.log(e);
+      }
+    }
+
     return await this.guidelinesRepo.update(
       id,
       updateGuidelineDto.name,
       updateGuidelineDto.desc,
-      updateGuidelineDto.code,
-      '',
-      updateGuidelineDto.imageDesc,
+      updateGuidelineDto.code!,
+      uploadRes ? uploadRes.filePath : guideline.image,
+      uploadRes ? uploadRes.fileId : guideline.imageId,
+      updateGuidelineDto.imageDesc!,
       getIdsToAdd(currentIds, updateGuidelineDto.deficiences),
       getIdsToRemove(currentIds, updateGuidelineDto.deficiences),
       tokenPayload.role === ACCESS_ADMIN ? updateGuidelineDto.statusCode : '',
@@ -160,7 +178,7 @@ export class GuidelinesService {
 
     const deleted = await this.guidelinesRepo.delete(id);
 
-    if (deleted.affected > 0) {
+    if (deleted.affected && deleted.affected > 0) {
       return {
         id,
       };

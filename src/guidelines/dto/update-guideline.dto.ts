@@ -8,9 +8,13 @@ export class UpdateGuidelineDto extends OmitType(CreateGuidelineDto, [
   @IsString({ message: 'O código do status é do tipo string' })
   @IsNotIn(['APPROVED', 'PENDING', 'REJECTED', 'DELETED'])
   @IsOptional()
-  statusCode: string;
+  statusCode?: string;
 
   @IsString({ message: 'A mensagem do status é do tipo string' })
   @IsOptional()
-  statusMsg: string;
+  statusMsg?: string;
+
+  @IsString()
+  @IsOptional()
+  imageId?: string;
 }

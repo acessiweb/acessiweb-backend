@@ -2,18 +2,14 @@ import {
   Body,
   Controller,
   Delete,
-  Get,
   Param,
   ParseUUIDPipe,
   Post,
   Put,
-  Query,
   UseGuards,
 } from '@nestjs/common';
 import { CommonUserService } from './common-users.service';
 import { CreateCommonUserDto } from './dto/create-common-user.dto';
-import CustomException from 'src/common/exceptions/custom-exception.exception';
-import { throwHttpException } from 'src/common/errors/utils';
 import { UpdateCommonUserDto } from './dto/update-common-user.dto';
 import { SetRoutePolicy } from 'src/auth/decorators/set-route-policy.decorator';
 import { RoutePolicies } from 'src/auth/enum/route-policies.enum';
@@ -26,13 +22,7 @@ export class CommonUserController {
 
   @Post()
   async create(@Body() createCommonUserDto: CreateCommonUserDto) {
-    try {
-      return await this.commonUsersService.create(createCommonUserDto);
-    } catch (e) {
-      if (e instanceof CustomException) {
-        throwHttpException(e);
-      }
-    }
+    return await this.commonUsersService.create(createCommonUserDto);
   }
 
   @SetRoutePolicy(RoutePolicies.user)
@@ -42,25 +32,13 @@ export class CommonUserController {
     @Param('cuid', ParseUUIDPipe) cuid: string,
     @Body() updateCommonUserDto: UpdateCommonUserDto,
   ) {
-    try {
-      return await this.commonUsersService.update(cuid, updateCommonUserDto);
-    } catch (e) {
-      if (e instanceof CustomException) {
-        throwHttpException(e);
-      }
-    }
+    return await this.commonUsersService.update(cuid, updateCommonUserDto);
   }
 
   @SetRoutePolicy(RoutePolicies.user)
   @UseGuards(AuthTokenGuard, RoutePolicyGuard)
   @Delete(':cuid')
   async delete(@Param('cuid', ParseUUIDPipe) cuid: string) {
-    try {
-      return await this.commonUsersService.delete(cuid);
-    } catch (e) {
-      if (e instanceof CustomException) {
-        throwHttpException(e);
-      }
-    }
+    return await this.commonUsersService.delete(cuid);
   }
 }
