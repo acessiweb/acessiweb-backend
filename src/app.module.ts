@@ -5,7 +5,7 @@ import { CommonUserModule } from './common-users/common-users.module';
 import { DeficiencesModule } from './deficiences/deficiences.module';
 import { GuidelinesModule } from './guidelines/guidelines.module';
 import { ProjectsModule } from './projects/projects.module';
-import { CommonUsersProjectsModule } from './common-users-projects/common-users-projects.module';
+import { CommonUsersProjectsModule } from './common-users/common-users-projects.module';
 
 @Module({
   imports: [
@@ -19,7 +19,7 @@ import { CommonUsersProjectsModule } from './common-users-projects/common-users-
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB,
-      synchronize: true, // true = shouldn't be used in production - otherwise you can lose production data
+      synchronize: false, // true = shouldn't be used in production - otherwise you can lose production data
       autoLoadEntities: true,
     }),
     CommonUserModule,
