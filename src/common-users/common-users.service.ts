@@ -83,7 +83,7 @@ export class CommonUserService {
 
     const updated = await this.commonUserRepo.update(id, updateCommonUserDto);
 
-    if (updated.affected > 0) {
+    if (updated.affected && updated.affected > 0) {
       const { username } = updated.raw[0];
 
       return { id, username };
@@ -111,9 +111,9 @@ export class CommonUserService {
 
           const auth = await this.authService.findOne({ userId: id });
 
-          await transactionalEntityManager.softDelete('Auth', auth.id);
+          await transactionalEntityManager.softDelete('Auth', auth?.id);
 
-          if (deletedUser.affected > 0) {
+          if (deletedUser.affected && deletedUser.affected > 0) {
             return {
               id,
             };

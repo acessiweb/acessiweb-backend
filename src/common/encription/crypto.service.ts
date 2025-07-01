@@ -19,7 +19,11 @@ export class CryptoService {
 
   encrypt(value: string): string {
     const iv = randomBytes(this.ivLength);
-    const key = scryptSync(process.env.CRYPTO_PASSWORD, 'salt', this.keyLength);
+    const key = scryptSync(
+      process.env.CRYPTO_PASSWORD!,
+      'salt',
+      this.keyLength,
+    );
 
     const cipher = createCipheriv(this.algorithm, key, iv);
     const encrypted = Buffer.concat([
@@ -34,7 +38,11 @@ export class CryptoService {
     const [ivBase64, encryptedBase64] = value.split(':');
     const iv = Buffer.from(ivBase64, 'base64');
     const content = Buffer.from(encryptedBase64, 'base64');
-    const key = scryptSync(process.env.CRYPTO_PASSWORD, 'salt', this.keyLength);
+    const key = scryptSync(
+      process.env.CRYPTO_PASSWORD!,
+      'salt',
+      this.keyLength,
+    );
 
     const decipher = createDecipheriv(this.algorithm, key, iv);
     const decrypted = Buffer.concat([

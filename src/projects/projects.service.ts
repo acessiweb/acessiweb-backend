@@ -80,7 +80,10 @@ export class ProjectsService {
 
     const updatedProj = await this.findOne(id);
 
-    if (updated.affected > 0 || project.guidelines !== updatedProj.guidelines) {
+    if (
+      (updated.affected && updated.affected > 0) ||
+      project.guidelines !== updatedProj.guidelines
+    ) {
       return await this.findOne(id);
     }
 
@@ -96,7 +99,7 @@ export class ProjectsService {
     await this.findOne(id);
     const deleted = await this.projRepo.delete(id);
 
-    if (deleted.affected > 0) {
+    if (deleted.affected && deleted.affected > 0) {
       return {
         id,
       };

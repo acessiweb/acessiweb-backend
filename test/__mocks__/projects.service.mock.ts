@@ -106,8 +106,6 @@ export const projectServiceMock = {
     delete: jest.fn().mockImplementation(async (id: string) => {
       await projectServiceMock.useValue.findOne(id);
 
-      console.log('hey');
-
       return Promise.resolve({
         id,
       });
@@ -123,7 +121,6 @@ export const projectServiceMock = {
           initialDate: Date;
           endDate: Date;
         }) => {
-          console.log(query);
           return projectsMock;
         },
       ),
