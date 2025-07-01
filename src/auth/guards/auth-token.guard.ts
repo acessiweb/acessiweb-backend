@@ -9,13 +9,18 @@ import CustomException from 'src/common/exceptions/custom-exception.exception';
 import { NOT_SIGN_IN } from 'src/common/errors/errors-codes';
 import { REQUEST_TOKEN_PAYLOAD } from '../auth.constants';
 import { AuthService } from '../auth.service';
+import { TokenPayloadDto } from '../dto/token-payload.dto';
+
+interface AuthenticatedRequest extends Request {
+  [REQUEST_TOKEN_PAYLOAD]: TokenPayloadDto;
+}
 
 @Injectable()
 export class AuthTokenGuard implements CanActivate {
   constructor(private readonly authService: AuthService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request: Request = context.switchToHttp().getRequest();
+    const request: AuthenticatedRequest = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
 
     if (!token) {

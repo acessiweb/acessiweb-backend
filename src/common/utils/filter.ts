@@ -7,10 +7,14 @@ export function getIdsToRemove(
   if (!compareArrays(newIds, currentIds)) {
     return currentIds.filter((id) => !newIds.includes(id));
   }
+
+  return [];
 }
 
 export function getIdsToAdd(currentIds: string[], newIds: string[]): string[] {
   if (!compareArrays(newIds, currentIds)) {
     return newIds.filter((id) => !currentIds.includes(id));
   }
+
+  return [];
 }

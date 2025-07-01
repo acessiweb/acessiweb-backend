@@ -7,12 +7,12 @@ import {
 } from '../constants/pagination';
 
 export type PaginationParams = {
-  limit?: number;
-  offset?: number;
+  limit: number;
+  offset: number;
 };
 
 export const Pagination = createParamDecorator(
-  (data: unknown, ctx: ExecutionContext) => {
+  (_data: unknown, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest();
 
     const { limit: rawLimit, offset: rawOffset } = request.query;

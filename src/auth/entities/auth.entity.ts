@@ -55,7 +55,7 @@ export class Auth {
   @Column({ default: 0 })
   smsVerificationAttempts: number;
 
-  @Column({ type: 'bytea' })
+  @Column({ type: 'bytea', nullable: true })
   password: string;
 
   @OneToOne(() => User)

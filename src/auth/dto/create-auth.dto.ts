@@ -1,7 +1,6 @@
 import {
   IsEmail,
   IsMobilePhone,
-  IsNotEmpty,
   IsOptional,
   Matches,
   MaxLength,
@@ -9,6 +8,7 @@ import {
 import { PASSWORD_MASK, PASSWORD_VALIDATION_MSG } from '../auth.constants';
 
 export class CreateAuthDto {
+  @IsOptional()
   @IsEmail(
     {},
     {
@@ -16,22 +16,21 @@ export class CreateAuthDto {
     },
   )
   @MaxLength(512, { message: 'Email deve possuir no máximo 512 caracteres' })
-  @IsOptional()
-  email: string;
+  email?: string;
 
+  @IsOptional()
   @IsMobilePhone('pt-BR', {}, { message: 'Número de celular inválido' })
-  @IsOptional()
-  mobilePhone: string;
+  mobilePhone?: string;
 
+  @IsOptional()
   @Matches(PASSWORD_MASK, {
     message: PASSWORD_VALIDATION_MSG,
   })
-  @IsNotEmpty({ message: 'É necessário enviar uma senha de acesso' })
   password: string;
 
+  @IsOptional()
   @Matches(PASSWORD_MASK, {
     message: PASSWORD_VALIDATION_MSG,
   })
-  @IsNotEmpty({ message: 'É necessário enviar a confirmação da senha' })
   confirmPassword: string;
 }

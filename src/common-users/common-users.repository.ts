@@ -28,7 +28,7 @@ export class CommonUsersRepository {
     return await this.commonUserRepository.softDelete(id);
   }
 
-  async findOneBy(id: string): Promise<CommonUser> {
+  async findOneBy(id: string): Promise<CommonUser | null> {
     return await this.commonUserRepository.findOneBy({ id });
   }
 }

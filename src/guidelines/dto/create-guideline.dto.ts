@@ -1,3 +1,4 @@
+import { Exclude, Transform } from 'class-transformer';
 import {
   ArrayNotEmpty,
   IsArray,
@@ -18,29 +19,36 @@ export class CreateGuidelineDto {
   @IsNotEmpty({ message: 'É necessário informar uma descrição' })
   desc: string;
 
+  @IsOptional()
   @IsString({ message: 'O código da diretriz é do tipo string' })
-  @IsOptional()
-  code: string;
+  code?: string;
 
-  @IsString({ message: 'A imagem da diretriz é do tipo string' })
-  @MaxLength(500, { message: 'A imagem deve ter no máximo 500 caracteres' })
-  @IsOptional()
-  image: string;
+  @Exclude()
+  image?: File;
 
+  @IsOptional()
   @IsString({ message: 'A descrição da imagem da diretriz é do tipo string' })
   @MaxLength(250, {
     message: 'A descrição da imagem deve ter no máximo 250 caracteres',
   })
-  @IsOptional()
-  imageDesc: string;
+  imageDesc?: string;
 
+  @Transform(({ value }) => {
+    let newString = value.toString();
+
+    newString = newString.replace('[', '');
+    newString = newString.replace(']', '');
+    newString = newString.replaceAll(`"`, '');
+
+    return newString.split(',');
+  })
   @IsArray({ message: 'As deficiências da diretriz são do tipo array' })
   @ArrayNotEmpty({
     message: 'A diretriz precisa ter ao menos uma deficiência relacionada',
   })
-  @IsUUID(4, {
+  @IsString({
     each: true,
-    message: 'A deficiência é do tipo UUID',
+    message: 'A deficiência é do tipo string',
   })
   deficiences: string[];
 

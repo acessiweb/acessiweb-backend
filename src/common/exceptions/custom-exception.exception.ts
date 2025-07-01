@@ -14,7 +14,7 @@ export default class CustomException {
   ) {
     this.message = message;
     this.errorCode = errorCode;
-    this.fields = fields;
-    this.httpErrorCode = httpErrorCode;
+    this.fields = fields || [];
+    this.httpErrorCode = httpErrorCode || HttpStatus.INTERNAL_SERVER_ERROR;
   }
 }
