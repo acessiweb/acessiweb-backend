@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  HttpStatus,
   Post,
   Put,
   Query,
@@ -19,6 +20,8 @@ import { RoutePolicies } from './enum/route-policies.enum';
 import { RoutePolicyGuard } from './guards/route-policy.guard';
 import { UpdateMobilePhoneDto } from './dto/update-phone.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
+import CustomException from 'src/common/exceptions/custom-exception.exception';
+import { RESOURCE_NOT_FOUND } from 'src/common/errors/errors-codes';
 
 @Controller('auth')
 export class AuthController {
@@ -41,7 +44,12 @@ export class AuthController {
       };
     }
 
-    return null;
+    throw new CustomException(
+      'Usuário não encontrado',
+      RESOURCE_NOT_FOUND,
+      [],
+      HttpStatus.NOT_FOUND,
+    );
   }
 
   @Post('login')

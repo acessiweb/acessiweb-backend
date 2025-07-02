@@ -1,4 +1,5 @@
 import * as dotenv from 'dotenv';
+import { Auth } from 'src/auth/entities/auth.entity';
 import { CommonUser } from 'src/common-users/entities/common-user.entity';
 import { Deficiency } from 'src/deficiences/entities/deficiences.entity';
 import { Guideline } from 'src/guidelines/entities/guideline.entity';
@@ -15,7 +16,7 @@ const AppDataSource = new DataSource({
   username: process.env.DATABASE_USERNAME,
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE_NAME,
-  entities: [Guideline, Deficiency, Project, User, CommonUser],
+  entities: [Guideline, Deficiency, Project, User, CommonUser, Auth],
   migrations: [__dirname + '/src/migrations/**/*{.ts,.js}'],
   synchronize: false,
   logging: true,
