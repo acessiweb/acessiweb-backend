@@ -19,7 +19,11 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "test:unit": "jest --testMatch \"<rootDir>/src/**/*.spec.ts\"",
-    "test:integration": "jest --detectOpenHandles --testMatch \"<rootDir>/test/integration/**/*.integration-spec.ts\""
+    "test:integration": "jest --detectOpenHandles --testMatch \"<rootDir>/test/integration/**/*.integration-spec.ts\"",
+    "typeorm": "npm run build && npx typeorm -d dist/ormconfig.js",
+    "migration:generate": "npm run typeorm migration:generate",
+    "migration:run": "npm run typeorm migration:run",
+    "migration:revert": "npm run typeorm migration:revert"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -32,6 +36,7 @@
     "bcryptjs": "^3.0.2",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
+    "dotenv": "^17.0.1",
     "imagekit": "^6.0.0",
     "module-alias": "^2.2.3",
     "pg": "^8.13.1",

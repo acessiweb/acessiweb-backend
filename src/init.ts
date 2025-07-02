@@ -4,16 +4,12 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 
 @Injectable()
 export class Init implements OnModuleInit {
-  constructor() // private readonly cryptoService: CryptoService,
-  // private readonly hashingService: HashingService,
+  constructor() // private readonly hashingService: HashingService, // private readonly cryptoService: CryptoService,
   {}
 
   async onModuleInit() {
     // const encrypted = this.cryptoService.encrypt('admin@acessiweb.com.br');
     // const hashed = this.cryptoService.toHash('admin@acessiweb.com.br');
     // const hashedPass = await this.hashingService.hash('sdab3&@7djksSf');
-    // console.log(encrypted);
-    // console.log(hashed);
-    // console.log(hashedPass);
   }
 }
