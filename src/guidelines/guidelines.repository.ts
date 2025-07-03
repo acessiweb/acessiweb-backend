@@ -200,31 +200,40 @@ export class GuidelinesRepository {
     }
 
     if (query.initialDate && !query.endDate) {
-      qb.andWhere('guideline.createdAt >= :initialDate', {
-        initialDate: query.initialDate,
+      const date = query.initialDate.toISOString().slice(0, 10);
+
+      qb.andWhere('DATE(guideline.createdAt) >= :initialDate', {
+        initialDate: date,
       });
     }
 
     if (!query.initialDate && query.endDate) {
+      const date = query.endDate.toISOString().slice(0, 10);
       qb.andWhere('guideline.createdAt <= :endDate', {
-        endDate: query.endDate,
+        endDate: date,
       });
     }
 
     if (query.initialDate && query.endDate) {
+      const initialDate = query.initialDate.toISOString().slice(0, 10);
+      const endDate = query.endDate.toISOString().slice(0, 10);
+
       qb.andWhere('guideline.createdAt BETWEEN :initialDate AND :endDate', {
-        initialDate: query.initialDate,
-        endDate: query.endDate,
+        initialDate: initialDate,
+        endDate: endDate,
       });
     }
 
     if (query.deficiences && query.deficiences.length > 0) {
       let deficiences = query.deficiences.toString().split(',');
       deficiences = deficiences.filter((def) => def);
+      const lowerCaseDeficiences = deficiences.map((name) =>
+        name.toLowerCase(),
+      );
 
       if (deficiences && deficiences.length > 0) {
-        qb.andWhere('deficiences.name IN (:...names)', {
-          names: deficiences,
+        qb.andWhere('LOWER(deficiences.name) IN (:...names)', {
+          names: lowerCaseDeficiences,
         });
       }
     }

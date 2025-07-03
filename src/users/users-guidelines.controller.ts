@@ -66,10 +66,10 @@ export class UserGuidelinesController {
   @UseGuards(AuthTokenGuard)
   @Delete(':id')
   async delete(
-    @Param('gid', ParseUUIDPipe) gid: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @TokenPayloadParam() tokenPayload: TokenPayloadDto,
   ) {
-    return await this.guidelinesService.delete(gid, tokenPayload);
+    return await this.guidelinesService.delete(id, tokenPayload);
   }
 
   @Get(':gid')
