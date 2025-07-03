@@ -8,8 +8,8 @@ import { ProjectsModule } from './projects/projects.module';
 import { CommonUsersProjectsModule } from './common-users/common-users-projects.module';
 import { UsersModule } from './users/users.module';
 import { UsersGuidelinesModule } from './users/users-guidelines.module';
-// import { InitModule } from './init.module';
 import { ImageKitModule } from './imagekit/imagekit.module';
+import { AdminUserModule } from './admin-users/admin-users.module';
 
 @Module({
   imports: [
@@ -35,8 +35,8 @@ import { ImageKitModule } from './imagekit/imagekit.module';
     CommonUsersProjectsModule,
     UsersModule,
     UsersGuidelinesModule,
-    // InitModule,
     ImageKitModule,
+    AdminUserModule,
   ],
 })
 export class AppModule {}

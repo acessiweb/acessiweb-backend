@@ -7,7 +7,6 @@ import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { Auth } from './entities/auth.entity';
 import { CryptoService } from 'src/common/encription/crypto.service';
-import { CommonUser } from 'src/common-users/entities/common-user.entity';
 import jwtConfig from './config/jwt.config';
 import { ConfigType } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
@@ -23,6 +22,7 @@ import {
 import { UpdateEmailDto } from './dto/update-email.dto';
 import { UpdateMobilePhoneDto } from './dto/update-phone.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -145,7 +145,7 @@ export class AuthService {
     return this.createTokens(auth);
   }
 
-  async create(createAuthDto: CreateAuthDto, user: CommonUser): Promise<Auth> {
+  async create(createAuthDto: CreateAuthDto, user: User): Promise<Auth> {
     if (!createAuthDto.email && !createAuthDto.mobilePhone) {
       this.throwEmailOrMobilePhoneEmpty();
     }
