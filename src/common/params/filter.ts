@@ -22,10 +22,13 @@ export const Filter = createParamDecorator(
       isRequest,
     } = request.query;
 
+    const iDate = new Date(initialDate);
+    const eDate = new Date(endDate);
+
     return {
       keyword,
-      initialDate: initialDate ? new Date(initialDate) : undefined,
-      endDate: endDate ? new Date(endDate) : undefined,
+      initialDate: isNaN(iDate.getTime()) ? undefined : iDate,
+      endDate: isNaN(eDate.getTime()) ? undefined : eDate,
       deficiences,
       statusCode,
       isRequest,

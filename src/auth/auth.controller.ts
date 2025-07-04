@@ -41,6 +41,10 @@ export class AuthController {
       return {
         id: auth.user.id,
         role: auth.user.role,
+        username:
+          'username' in auth.user && typeof auth.user.username == 'string'
+            ? auth.user.username
+            : '',
       };
     }
 

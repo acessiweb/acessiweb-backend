@@ -7,4 +7,5 @@ export class TokenPayloadDto {
   aud: string;
   iss: string;
   role: string;
+  username?: string;
 }

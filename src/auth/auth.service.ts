@@ -22,7 +22,8 @@ import {
 import { UpdateEmailDto } from './dto/update-email.dto';
 import { UpdateMobilePhoneDto } from './dto/update-phone.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-import { User } from 'src/users/entities/user.entity';
+import { CommonUser } from 'src/common-users/entities/common-user.entity';
+import { AdminUser } from 'src/admin-users/entities/admin-user.entity';
 
 @Injectable()
 export class AuthService {
@@ -41,34 +42,28 @@ export class AuthService {
     mobilePhone?: string;
     userId?: string;
   }): Promise<Auth | null> {
-    const query = {} as {
-      emailHash?: string;
-      mobilePhoneHash?: string;
-      user?: {
-        id: string;
-      };
-    };
+    const qb = this.authRepository
+      .createQueryBuilder('auth')
+      .leftJoinAndSelect('auth.user', 'user');
 
     if (where.email) {
-      query['emailHash'] = this.cryptoService.toHash(where.email);
+      qb.where('auth.emailHash = :emailHash', {
+        emailHash: this.cryptoService.toHash(where.email),
+      });
     }
 
     if (where.mobilePhone) {
-      query['mobilePhoneHash'] = this.cryptoService.toHash(where.mobilePhone);
+      qb.where('auth.mobilePhone = :mobilePhoneHash', {
+        mobilePhoneHash: this.cryptoService.toHash(where.mobilePhone),
+      });
     }
 
     if (where.userId) {
-      query['user'] = {
-        id: where.userId,
-      };
+      qb.where('auth.user = :user', { user: where.userId });
     }
 
-    return await this.authRepository.findOne({
-      where: query,
-      relations: {
-        user: true,
-      },
-    });
+    const auth = await qb.getOne();
+    return auth;
   }
 
   throwEmailOrMobilePhoneEmpty() {
@@ -145,7 +140,10 @@ export class AuthService {
     return this.createTokens(auth);
   }
 
-  async create(createAuthDto: CreateAuthDto, user: User): Promise<Auth> {
+  async create(
+    createAuthDto: CreateAuthDto,
+    user: CommonUser | AdminUser,
+  ): Promise<Auth> {
     if (!createAuthDto.email && !createAuthDto.mobilePhone) {
       this.throwEmailOrMobilePhoneEmpty();
     }
@@ -353,20 +351,10 @@ export class AuthService {
   }
 
   async getTokenPayload(token: string): Promise<TokenPayloadDto> {
-    const tokenPayload = await this.jwtService.verifyAsync<TokenPayloadDto>(
+    return await this.jwtService.verifyAsync<TokenPayloadDto>(
       token,
       this.jwtConfiguration,
     );
-
-    if (tokenPayload.email) {
-      tokenPayload['email'] = tokenPayload.email;
-    }
-
-    if (tokenPayload.mobilePhone) {
-      tokenPayload['mobilePhone'] = tokenPayload.mobilePhone;
-    }
-
-    return tokenPayload;
   }
 
   async createTokens(auth: Auth): Promise<{
@@ -375,12 +363,15 @@ export class AuthService {
   }> {
     const jwtPayload = {} as JwtPayload;
 
-    if (auth.email)
-      jwtPayload['email'] = this.cryptoService.decrypt(auth.email);
+    if (auth.email) jwtPayload.email = this.cryptoService.decrypt(auth.email);
     if (auth.mobilePhone)
-      jwtPayload['mobilePhone'] = this.cryptoService.decrypt(auth.mobilePhone);
+      jwtPayload.mobilePhone = this.cryptoService.decrypt(auth.mobilePhone);
 
-    jwtPayload['role'] = auth.user.role;
+    jwtPayload.role = auth.user.role;
+
+    if ('username' in auth.user && typeof auth.user.username == 'string') {
+      jwtPayload.username = auth.user.username;
+    }
 
     const [accessToken, refreshToken] = await Promise.all([
       this.signJwtAsync(auth.user.id, jwtPayload),
