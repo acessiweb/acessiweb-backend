@@ -202,6 +202,7 @@ export class GuidelinesService {
     initialDate?: Date;
     endDate?: Date;
     isRequest?: boolean;
+    isDeleted?: boolean;
   }) {
     return await this.guidelinesRepo.findAll(query);
   }

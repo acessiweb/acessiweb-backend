@@ -91,6 +91,8 @@ export class UserGuidelinesController {
       initialDate: filters?.initialDate,
       endDate: filters?.endDate,
       deficiences: filters?.deficiences,
+      isDeleted: filters?.isDeleted,
+      isRequest: true,
     });
   }
 }

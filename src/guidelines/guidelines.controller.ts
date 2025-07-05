@@ -24,7 +24,8 @@ export class GuidelinesController {
       initialDate: filters?.initialDate,
       endDate: filters?.endDate,
       deficiences: filters?.deficiences,
-      isRequest: filters?.isRequest,
+      isRequest: false,
+      isDeleted: filters?.isDeleted,
     });
   }
 }

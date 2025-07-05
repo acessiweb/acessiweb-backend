@@ -6,7 +6,7 @@ export type FilterParams = {
   endDate?: Date;
   deficiences?: string[];
   statusCode?: string;
-  isRequest?: boolean;
+  isDeleted?: boolean;
 };
 
 export const Filter = createParamDecorator(
@@ -19,7 +19,7 @@ export const Filter = createParamDecorator(
       endDate,
       deficiences,
       statusCode,
-      isRequest,
+      isDeleted,
     } = request.query;
 
     const iDate = new Date(initialDate);
@@ -31,7 +31,7 @@ export const Filter = createParamDecorator(
       endDate: isNaN(eDate.getTime()) ? undefined : eDate,
       deficiences,
       statusCode,
-      isRequest,
+      isDeleted: isDeleted === 'true' ? true : false,
     };
   },
 );

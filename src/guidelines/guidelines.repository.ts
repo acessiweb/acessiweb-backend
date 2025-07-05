@@ -169,6 +169,7 @@ export class GuidelinesRepository {
     initialDate?: Date;
     endDate?: Date;
     isRequest?: boolean;
+    isDeleted?: boolean;
   }): Promise<PaginationResponse> {
     const qb = this.guidelineRepository
       .createQueryBuilder('guideline')
@@ -244,8 +245,12 @@ export class GuidelinesRepository {
       });
     }
 
-    const [data, total] = await qb.getManyAndCount();
+    if (query.isDeleted) {
+      qb.withDeleted();
+      qb.andWhere('guideline.deletedAt IS NOT NULL');
+    }
 
+    const [data, total] = await qb.getManyAndCount();
     const pagination = getPagination(query.offset, query.limit, total);
 
     return {
