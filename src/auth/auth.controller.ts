@@ -27,6 +27,11 @@ import { RESOURCE_NOT_FOUND } from 'src/common/errors/errors-codes';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Post('google')
+  async googleAuth(@Body() body: { idToken: string }) {
+    return this.authService.validateGoogleAuth(body.idToken);
+  }
+
   @Get('lookup')
   async lookup(
     @Query('email') email?: string,
