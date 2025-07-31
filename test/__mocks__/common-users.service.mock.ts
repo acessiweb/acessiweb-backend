@@ -2,10 +2,7 @@ import { CommonUserService } from 'src/common-users/common-users.service';
 import { CreateCommonUserDto } from 'src/common-users/dto/create-common-user.dto';
 import { UpdateCommonUserDto } from 'src/common-users/dto/update-common-user.dto';
 import { CommonUser } from 'src/common-users/entities/common-user.entity';
-import {
-  INVALID_DATA,
-  RESOURCE_NOT_FOUND,
-} from 'src/common/errors/errors-codes';
+import { INVALID_DATA, RESOURCE_NOT_FOUND } from 'src/common/constants/errors';
 import CustomException from 'src/common/exceptions/custom-exception.exception';
 
 export const commonUsersMock = [

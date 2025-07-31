@@ -1,6 +1,6 @@
-import { CreateProjectDto } from '../../src/projects/dto/create-project.dto';
-import { Project } from '../../src/projects/entities/project.entity';
-import { ProjectsService } from '../../src/projects/projects.service';
+import { CreateProjectDto } from '../../src/domains/projects/dto/create-project.dto';
+import { Project } from '../../src/domains/projects/entities/project.entity';
+import { ProjectsService } from '../../src/domains/projects/projects.service';
 import { commonUserServiceMock } from './common-users.service.mock';
 import {
   guidelineServiceMock,
@@ -10,9 +10,9 @@ import CustomException from 'src/common/exceptions/custom-exception.exception';
 import {
   REQUIRED_FIELD,
   RESOURCE_NOT_FOUND,
-} from 'src/common/errors/errors-codes';
+} from 'src/common/constants/errors';
 import { HttpStatus } from '@nestjs/common';
-import { UpdateProjectDto } from 'src/projects/dto/update-project.dto';
+import { UpdateProjectDto } from 'src/domains/projects/dto/update-project.dto';
 
 export const projectsMock = [
   {

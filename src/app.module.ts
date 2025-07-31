@@ -1,15 +1,13 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { CommonUserModule } from './common-users/common-users.module';
-import { DeficiencesModule } from './deficiences/deficiences.module';
-import { GuidelinesModule } from './guidelines/guidelines.module';
-import { ProjectsModule } from './projects/projects.module';
-import { CommonUsersProjectsModule } from './common-users/common-users-projects.module';
-import { UsersModule } from './users/users.module';
-import { UsersGuidelinesModule } from './users/users-guidelines.module';
-import { ImageKitModule } from './imagekit/imagekit.module';
-import { AdminUserModule } from './admin-users/admin-users.module';
+import { DeficiencesModule } from './domains/deficiences/deficiences.module';
+import { GuidelinesModule } from './domains/guidelines/guidelines.module';
+import { ProjectsModule } from './domains/projects/projects.module';
+import { UsersModule } from './domains/users/users.module';
+import { ImageKitModule } from './integrations/imagekit/imagekit.module';
+import { AdminUserModule } from './domains/users/admin-users/admin-users.module';
+import { CommonUserModule } from './domains/users/common-users/common-users.module';
 
 @Module({
   imports: [
@@ -32,9 +30,7 @@ import { AdminUserModule } from './admin-users/admin-users.module';
     DeficiencesModule,
     GuidelinesModule,
     ProjectsModule,
-    CommonUsersProjectsModule,
     UsersModule,
-    UsersGuidelinesModule,
     ImageKitModule,
     AdminUserModule,
   ],

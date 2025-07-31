@@ -1,7 +1,7 @@
-import { Guideline } from 'src/guidelines/entities/guideline.entity';
-import { GuidelinesService } from 'src/guidelines/guidelines.service';
+import { Guideline } from 'src/domains/guidelines/entities/guideline.entity';
+import { GuidelinesService } from 'src/domains/guidelines/guidelines.service';
 import CustomException from 'src/common/exceptions/custom-exception.exception';
-import { RESOURCE_NOT_FOUND } from 'src/common/errors/errors-codes';
+import { RESOURCE_NOT_FOUND } from 'src/common/constants/errors';
 import { usersMock } from './users.service.mock';
 import { deficiencesMock } from './deficiences.service.mock';
 

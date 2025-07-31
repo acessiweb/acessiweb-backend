@@ -1,0 +1,47 @@
+import {
+  CanActivate,
+  ExecutionContext,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { REQUEST_TOKEN_PAYLOAD, ROUTE_POLICY_KEY } from '../auth.constants';
+import { RoutePolicies } from '../enum/route-policies.enum';
+import CustomException from 'src/common/exceptions/custom-exception.exception';
+import { UNAUTHORIZED } from 'src/common/constants/errors';
+import { TokenPayloadDto } from '../dto/token-payload.dto';
+
+@Injectable()
+export class RoutePolicyGuard implements CanActivate {
+  constructor(private readonly reflector: Reflector) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const routePolicyRequired = this.reflector.getAllAndOverride<
+      RoutePolicies | undefined
+    >(ROUTE_POLICY_KEY, [context.getHandler(), context.getClass()]);
+
+    console.log(routePolicyRequired);
+
+    //não precisa de permissões para a rota
+    if (!routePolicyRequired) {
+      return true;
+    }
+
+    const request = context.switchToHttp().getRequest();
+    const tokenPayload: TokenPayloadDto = request[REQUEST_TOKEN_PAYLOAD];
+
+    //testar, não tava validando certo
+    if (!tokenPayload || tokenPayload.role !== routePolicyRequired) {
+      throw new CustomException(
+        `Usuário não tem permissão ${routePolicyRequired}`,
+        UNAUTHORIZED,
+        [],
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    console.log('passou');
+
+    return true;
+  }
+}

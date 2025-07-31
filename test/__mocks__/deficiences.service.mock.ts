@@ -1,5 +1,5 @@
-import { DeficiencesService } from 'src/deficiences/deficiences.service';
-import { Deficiency } from 'src/deficiences/entities/deficiences.entity';
+import { DeficiencesService } from 'src/domains/deficiences/deficiences.service';
+import { Deficiency } from 'src/domains/deficiences/entities/deficiences.entity';
 
 export const deficiencesMock = [
   {

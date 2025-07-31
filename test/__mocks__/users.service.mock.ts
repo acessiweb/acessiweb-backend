@@ -1,7 +1,7 @@
-import { RESOURCE_NOT_FOUND } from 'src/common/errors/errors-codes';
+import { RESOURCE_NOT_FOUND } from 'src/common/constants/errors';
 import CustomException from 'src/common/exceptions/custom-exception.exception';
-import { User } from 'src/users/entities/user.entity';
-import { UsersService } from 'src/users/users.service';
+import { User } from 'src/domains/users/entities/user.entity';
+import { UsersService } from 'src/domains/users/users.service';
 
 export const usersMock = [
   {

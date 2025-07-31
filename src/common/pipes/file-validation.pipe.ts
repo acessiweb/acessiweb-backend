@@ -1,6 +1,6 @@
 import { PipeTransform, Injectable, HttpStatus } from '@nestjs/common';
 import CustomException from '../exceptions/custom-exception.exception';
-import { INVALID_EXTENSION, MAX_SIZE_EXCEEDED } from '../errors/errors-codes';
+import { INVALID_EXTENSION, MAX_SIZE_EXCEEDED } from '../constants/errors';
 
 @Injectable()
 export class FileValidationPipe implements PipeTransform {

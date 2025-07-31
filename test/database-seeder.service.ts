@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Deficiency } from 'src/deficiences/entities/deficiences.entity';
-import { Guideline } from 'src/guidelines/entities/guideline.entity';
-import { User } from 'src/users/entities/user.entity';
+import { Deficiency } from 'src/domains/deficiences/entities/deficiences.entity';
+import { Guideline } from 'src/domains/guidelines/entities/guideline.entity';
+import { User } from 'src/domains/users/entities/user.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()

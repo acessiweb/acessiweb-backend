@@ -2,24 +2,24 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { INestApplication } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { ProjectsService } from 'src/projects/projects.service';
+import { ProjectsService } from 'src/domains/projects/projects.service';
 import { CommonUser } from 'src/common-users/entities/common-user.entity';
-import { Project } from 'src/projects/entities/project.entity';
+import { Project } from 'src/domains/projects/entities/project.entity';
 import {
   PostgreSqlContainer,
   StartedPostgreSqlContainer,
 } from '@testcontainers/postgresql';
-import { ProjectsModule } from 'src/projects/projects.module';
-import { CreateProjectDto } from 'src/projects/dto/create-project.dto';
+import { ProjectsModule } from 'src/domains/projects/projects.module';
+import { CreateProjectDto } from 'src/domains/projects/dto/create-project.dto';
 import { DatabaseSeederService } from 'test/database-seeder.service';
-import { Deficiency } from 'src/deficiences/entities/deficiences.entity';
-import { User } from 'src/users/entities/user.entity';
-import { Guideline } from 'src/guidelines/entities/guideline.entity';
-import { UpdateProjectDto } from 'src/projects/dto/update-project.dto';
-import { DeficiencesModule } from 'src/deficiences/deficiences.module';
-import { GuidelinesModule } from 'src/guidelines/guidelines.module';
-import { UsersModule } from 'src/users/users.module';
-import { AuthModule } from 'src/auth/auth.module';
+import { Deficiency } from 'src/domains/deficiences/entities/deficiences.entity';
+import { User } from 'src/domains/users/entities/user.entity';
+import { Guideline } from 'src/domains/guidelines/entities/guideline.entity';
+import { UpdateProjectDto } from 'src/domains/projects/dto/update-project.dto';
+import { DeficiencesModule } from 'src/domains/deficiences/deficiences.module';
+import { GuidelinesModule } from 'src/domains/guidelines/guidelines.module';
+import { UsersModule } from 'src/domains/users/users.module';
+import { AuthModule } from 'src/services/auth/auth.module';
 import { CommonUserModule } from 'src/common-users/common-users.module';
 
 describe('ProjectsService (integration)', () => {

@@ -7,13 +7,13 @@ import {
 } from '@nestjs/common';
 import CustomException from 'src/common/exceptions/custom-exception.exception';
 import { Response } from 'express';
+import { isArray, ValidationError } from 'class-validator';
 import {
   INVALID_DATA,
   INVALID_TYPE,
   MAX_LENGTH_EXCEEDED,
   REQUIRED_FIELD,
-} from 'src/common/errors/errors-codes';
-import { isArray, ValidationError } from 'class-validator';
+} from '../constants/errors';
 
 @Catch(BadRequestException)
 export class ValidationExceptionFilter implements ExceptionFilter {

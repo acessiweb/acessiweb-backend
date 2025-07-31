@@ -1,12 +1,12 @@
 import * as dotenv from 'dotenv';
-import { AdminUser } from 'src/admin-users/entities/admin-user.entity';
-import { Auth } from 'src/auth/entities/auth.entity';
-import { CommonUser } from 'src/common-users/entities/common-user.entity';
-import { Deficiency } from 'src/deficiences/entities/deficiences.entity';
-import { Guideline } from 'src/guidelines/entities/guideline.entity';
-import { Project } from 'src/projects/entities/project.entity';
-import { User } from 'src/users/entities/user.entity';
+import { AdminUser } from 'src/domains/users/admin-users/entities/admin-user.entity';
+import { Auth } from 'src/services/auth/entities/auth.entity';
+import { Deficiency } from 'src/domains/deficiences/entities/deficiences.entity';
+import { Guideline } from 'src/domains/guidelines/entities/guideline.entity';
+import { Project } from 'src/domains/projects/entities/project.entity';
+import { User } from 'src/domains/users/entities/user.entity';
 import { DataSource } from 'typeorm';
+import { CommonUser } from 'src/domains/users/common-users/entities/common-user.entity';
 
 dotenv.config();
 

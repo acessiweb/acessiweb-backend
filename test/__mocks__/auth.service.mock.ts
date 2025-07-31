@@ -1,4 +1,4 @@
-import { AuthService } from 'src/auth/auth.service';
+import { AuthService } from 'src/services/auth/auth.service';
 import { Auth } from 'typeorm';
 
 const authsMock = [

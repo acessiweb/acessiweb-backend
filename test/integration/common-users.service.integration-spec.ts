@@ -8,18 +8,18 @@ import {
   StartedPostgreSqlContainer,
 } from '@testcontainers/postgresql';
 import { DatabaseSeederService } from 'test/database-seeder.service';
-import { Deficiency } from 'src/deficiences/entities/deficiences.entity';
-import { User } from 'src/users/entities/user.entity';
-import { Guideline } from 'src/guidelines/entities/guideline.entity';
+import { Deficiency } from 'src/domains/deficiences/entities/deficiences.entity';
+import { User } from 'src/domains/users/entities/user.entity';
+import { Guideline } from 'src/domains/guidelines/entities/guideline.entity';
 import { CreateCommonUserDto } from 'src/common-users/dto/create-common-user.dto';
 import { CommonUserService } from 'src/common-users/common-users.service';
 import { CommonUserModule } from 'src/common-users/common-users.module';
-import { Auth } from 'src/auth/entities/auth.entity';
-import { ProjectsModule } from 'src/projects/projects.module';
-import { DeficiencesModule } from 'src/deficiences/deficiences.module';
-import { GuidelinesModule } from 'src/guidelines/guidelines.module';
-import { UsersModule } from 'src/users/users.module';
-import { AuthModule } from 'src/auth/auth.module';
+import { Auth } from 'src/services/auth/entities/auth.entity';
+import { ProjectsModule } from 'src/domains/projects/projects.module';
+import { DeficiencesModule } from 'src/domains/deficiences/deficiences.module';
+import { GuidelinesModule } from 'src/domains/guidelines/guidelines.module';
+import { UsersModule } from 'src/domains/users/users.module';
+import { AuthModule } from 'src/services/auth/auth.module';
 import { UpdateCommonUserDto } from 'src/common-users/dto/update-common-user.dto';
 
 describe('CommonUserService (integration)', () => {

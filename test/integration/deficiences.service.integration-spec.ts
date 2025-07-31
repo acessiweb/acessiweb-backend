@@ -6,12 +6,12 @@ import {
   PostgreSqlContainer,
   StartedPostgreSqlContainer,
 } from '@testcontainers/postgresql';
-import { Deficiency } from 'src/deficiences/entities/deficiences.entity';
-import { DeficiencesService } from 'src/deficiences/deficiences.service';
-import { DeficiencesModule } from 'src/deficiences/deficiences.module';
+import { Deficiency } from 'src/domains/deficiences/entities/deficiences.entity';
+import { DeficiencesService } from 'src/domains/deficiences/deficiences.service';
+import { DeficiencesModule } from 'src/domains/deficiences/deficiences.module';
 import { DatabaseSeederService } from 'test/database-seeder.service';
-import { Guideline } from 'src/guidelines/entities/guideline.entity';
-import { User } from 'src/users/entities/user.entity';
+import { Guideline } from 'src/domains/guidelines/entities/guideline.entity';
+import { User } from 'src/domains/users/entities/user.entity';
 
 describe('DeficiencesService (integration)', () => {
   let app: INestApplication;
