@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 
 @Entity()
-@TableInheritance({ column: { type: 'varchar', name: 'role', length: 15 } })
+@TableInheritance({ column: { type: 'varchar', name: 'role', length: 20 } })
 export abstract class User extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -19,7 +19,7 @@ export abstract class User extends BaseEntity {
   role: 'user' | 'admin';
 
   @CreateDateColumn({
-    type: 'timestamp without time zone',
+    type: 'timestamp with time zone',
     default: () => 'CURRENT_TIMESTAMP',
     nullable: false,
   })

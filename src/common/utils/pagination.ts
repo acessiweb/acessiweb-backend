@@ -1,3 +1,5 @@
+import { PartialPaginationResponse } from 'src/types/pagination';
+
 export function getPagination(
   offset: number,
   limit: number,

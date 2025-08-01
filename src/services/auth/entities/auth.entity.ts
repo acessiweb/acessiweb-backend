@@ -26,7 +26,7 @@ export class Auth {
   verificationToken: string;
 
   @Column({
-    type: 'timestamp without time zone',
+    type: 'timestamp with time zone',
     nullable: true,
   })
   verificationTokenExpiry: Date;
@@ -47,7 +47,7 @@ export class Auth {
   smsVerificationCode: string;
 
   @Column({
-    type: 'timestamp without time zone',
+    type: 'timestamp with time zone',
     nullable: true,
   })
   smsVerificationCodeExpiry: Date;
@@ -62,6 +62,6 @@ export class Auth {
   @JoinColumn()
   user: User;
 
-  @DeleteDateColumn({ type: 'timestamp without time zone', nullable: true })
+  @DeleteDateColumn({ type: 'timestamp with time zone', nullable: true })
   deletedAt: Date;
 }

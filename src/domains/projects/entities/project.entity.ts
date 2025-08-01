@@ -17,7 +17,7 @@ export class Project {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'varchar', length: '150', nullable: false })
+  @Column({ type: 'varchar', length: 100, nullable: false })
   name: string;
 
   @Column({ type: 'text', nullable: true })
@@ -34,19 +34,19 @@ export class Project {
   user: CommonUser;
 
   @CreateDateColumn({
-    type: 'timestamp without time zone',
+    type: 'timestamp with time zone',
     default: () => 'CURRENT_TIMESTAMP',
     nullable: false,
   })
   createdAt: Date;
 
   @UpdateDateColumn({
-    type: 'timestamp without time zone',
+    type: 'timestamp with time zone',
     default: () => 'CURRENT_TIMESTAMP',
     nullable: false,
   })
   updatedAt: Date;
 
-  @DeleteDateColumn({ type: 'timestamp without time zone', nullable: true })
+  @DeleteDateColumn({ type: 'timestamp with time zone', nullable: true })
   deletedAt: Date;
 }

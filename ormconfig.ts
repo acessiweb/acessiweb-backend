@@ -7,6 +7,7 @@ import { Project } from 'src/domains/projects/entities/project.entity';
 import { User } from 'src/domains/users/entities/user.entity';
 import { DataSource } from 'typeorm';
 import { CommonUser } from 'src/domains/users/common-users/entities/common-user.entity';
+import { Preference } from 'src/domains/preferences/entities/preference.entity';
 
 dotenv.config();
 
@@ -17,8 +18,17 @@ const AppDataSource = new DataSource({
   username: process.env.DATABASE_USERNAME,
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE_NAME,
-  entities: [Guideline, Deficiency, Project, User, CommonUser, Auth, AdminUser],
-  migrations: [__dirname + '/src/migrations/**/*{.ts,.js}'],
+  entities: [
+    Guideline,
+    Deficiency,
+    Project,
+    User,
+    CommonUser,
+    Auth,
+    AdminUser,
+    Preference,
+  ],
+  migrations: [__dirname + '/src/database/migrations/**/*{.ts,.js}'],
   synchronize: false,
   logging: true,
 });

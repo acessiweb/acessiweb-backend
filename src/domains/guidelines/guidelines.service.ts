@@ -138,7 +138,7 @@ export class GuidelinesService {
       tokenPayload.role === ACCESS_USER &&
       guideline.statusCode === 'PENDING'
     ) {
-      this.throwCantEditorDeleteGuideline('update', 'AGUARDANDO');
+      this.throwCantEditorDeleteGuideline('update', 'PENDENTE');
     }
 
     if (image && !updateGuidelineDto.imageDesc) {
@@ -214,7 +214,7 @@ export class GuidelinesService {
       tokenPayload.role === ACCESS_USER &&
       guideline.statusCode === 'PENDING'
     ) {
-      this.throwCantEditorDeleteGuideline('delete', 'AGUARDANDO');
+      this.throwCantEditorDeleteGuideline('delete', 'PENDENTE');
     }
 
     if (
@@ -255,7 +255,7 @@ export class GuidelinesService {
 
   throwCantEditorDeleteGuideline(
     action: 'update' | 'delete',
-    status: 'APROVADA' | 'AGUARDANDO',
+    status: 'APROVADA' | 'PENDENTE',
   ) {
     throw new CustomException(
       `A solicitação não pode ser ${action === 'update' ? 'editada' : 'deletada'} pois ela está com status ${status}`,

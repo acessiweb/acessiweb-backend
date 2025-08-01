@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Project } from './entities/project.entity';
 import { Brackets, DataSource, Repository, UpdateResult } from 'typeorm';
 import { getPagination } from 'src/common/utils/pagination';
+import { PaginationResponse } from 'src/types/pagination';
 
 @Injectable()
 export class ProjectsRepository {
