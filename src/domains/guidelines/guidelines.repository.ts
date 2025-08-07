@@ -252,7 +252,7 @@ export class GuidelinesRepository {
       });
     }
 
-    if ('isDeleted' in query) {
+    if ('isDeleted' in query && query.isDeleted) {
       qb.withDeleted();
       qb.andWhere('guideline.deletedAt IS NOT NULL');
     }
