@@ -13,6 +13,7 @@ import CustomException from 'src/common/exceptions/custom-exception.exception';
 import { ProjectsRepository } from './projects.repository';
 import { getIdsToAdd, getIdsToRemove } from 'src/common/utils/filter';
 import { CommonUserService } from '../users/common-users/common-users.service';
+import { ProjectQuery } from 'src/types/query';
 
 @Injectable()
 export class ProjectsService {
@@ -30,8 +31,13 @@ export class ProjectsService {
     for (let rd of removedDuplicate) {
       try {
         const found = await this.guidelinesService.findOne(rd);
-        data.push(found);
-      } catch (e) {}
+
+        if (found.statusCode === 'APPROVED' && !found.isRequest) {
+          data.push(found);
+        }
+      } catch (e) {
+        console.error(e);
+      }
     }
 
     return data;
@@ -122,14 +128,7 @@ export class ProjectsService {
     );
   }
 
-  async findAll(query: {
-    limit: number;
-    offset: number;
-    commonUserId?: string;
-    keyword?: string;
-    initialDate?: Date;
-    endDate?: Date;
-  }) {
-    return await this.projRepo.findAll(query);
+  async findAll(userId: string, query: ProjectQuery) {
+    return await this.projRepo.findAll(userId, query);
   }
 }

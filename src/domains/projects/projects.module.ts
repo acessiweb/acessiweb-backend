@@ -6,6 +6,7 @@ import { GuidelinesModule } from 'src/domains/guidelines/guidelines.module';
 import { ProjectsRepository } from './projects.repository';
 import { CommonUserModule } from '../users/common-users/common-users.module';
 import { ProjectsController } from './projects.controller';
+import { FilterRepository } from 'src/common/repositories/filter.repository';
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import { ProjectsController } from './projects.controller';
     GuidelinesModule,
   ],
   controllers: [ProjectsController],
-  providers: [ProjectsService, ProjectsRepository],
+  providers: [ProjectsService, ProjectsRepository, FilterRepository],
   exports: [ProjectsService, ProjectsRepository],
 })
 export class ProjectsModule {}

@@ -17,21 +17,17 @@ import { RoutePolicies } from 'src/services/auth/enum/route-policies.enum';
 import { RoutePolicyGuard } from 'src/services/auth/guards/route-policy.guard';
 import { TokenPayloadParam } from 'src/services/auth/params/token-payload.param';
 import { TokenPayloadDto } from 'src/services/auth/dto/token-payload.dto';
-import { CommonUserService } from '../users/common-users/common-users.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import Pagination from 'src/common/decorators/pagination';
 import { PaginationParams } from 'src/types/pagination';
 import Filter from 'src/common/decorators/filter';
-import { FilterParams } from 'src/types/filter';
+import { ProjectFilter } from 'src/types/filter';
 
 @SetRoutePolicy(RoutePolicies.user)
 @UseGuards(AuthTokenGuard, RoutePolicyGuard)
 @Controller('projects')
 export class ProjectsController {
-  constructor(
-    private readonly commonUserService: CommonUserService,
-    private readonly projectsService: ProjectsService,
-  ) {}
+  constructor(private readonly projectsService: ProjectsService) {}
 
   @Post()
   async create(
@@ -61,11 +57,9 @@ export class ProjectsController {
   async findAll(
     @TokenPayloadParam() tokenPayload: TokenPayloadDto,
     @Pagination() pagination: PaginationParams,
-    @Filter() filters?: FilterParams,
+    @Filter() filters?: ProjectFilter,
   ) {
-    await this.commonUserService.findOneBy(tokenPayload.sub);
-    return await this.projectsService.findAll({
-      commonUserId: tokenPayload.sub,
+    return await this.projectsService.findAll(tokenPayload.sub, {
       limit: pagination.limit,
       offset: pagination.offset,
       keyword: filters?.keyword,

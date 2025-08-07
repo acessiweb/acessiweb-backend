@@ -3,7 +3,6 @@ import { CommonUser } from 'src/domains/users/common-users/entities/common-user.
 import {
   Column,
   CreateDateColumn,
-  DeleteDateColumn,
   Entity,
   JoinTable,
   ManyToMany,
@@ -46,7 +45,4 @@ export class Project {
     nullable: false,
   })
   updatedAt: Date;
-
-  @DeleteDateColumn({ type: 'timestamp with time zone', nullable: true })
-  deletedAt: Date;
 }

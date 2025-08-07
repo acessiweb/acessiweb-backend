@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Project } from './entities/project.entity';
-import { Brackets, DataSource, Repository, UpdateResult } from 'typeorm';
+import { DataSource, DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { getPagination } from 'src/common/utils/pagination';
 import { PaginationResponse } from 'src/types/pagination';
+import { FilterRepository } from 'src/common/repositories/filter.repository';
+import { ProjectQuery } from 'src/types/query';
 
 @Injectable()
 export class ProjectsRepository {
@@ -11,6 +13,7 @@ export class ProjectsRepository {
     @InjectRepository(Project)
     private projectRepository: Repository<Project>,
     private readonly dataSource: DataSource,
+    private readonly filterRepository: FilterRepository,
   ) {}
 
   async update(
@@ -40,8 +43,8 @@ export class ProjectsRepository {
     ]);
   }
 
-  async delete(id: string): Promise<UpdateResult> {
-    return await this.projectRepository.softDelete(id);
+  async delete(id: string): Promise<DeleteResult> {
+    return await this.projectRepository.delete(id);
   }
 
   async findOne(id: string): Promise<Project | null> {
@@ -53,57 +56,39 @@ export class ProjectsRepository {
     });
   }
 
-  async findAll(query: {
-    limit: number;
-    offset: number;
-    commonUserId?: string;
-    keyword?: string;
-    initialDate?: Date;
-    endDate?: Date;
-  }): Promise<PaginationResponse> {
+  async findAll(
+    userId: string,
+    query: ProjectQuery,
+  ): Promise<PaginationResponse> {
     const qb = this.projectRepository
       .createQueryBuilder('project')
       .limit(query.limit)
       .offset(query.offset)
       .leftJoinAndSelect('project.guidelines', 'guidelines')
-      .cache(true);
-
-    if (query.commonUserId) {
-      qb.where('project.userId = :commonUserId', {
-        commonUserId: query.commonUserId,
+      .cache(true)
+      .where('project."userId" = :userId', {
+        userId: userId,
       });
-    }
 
     if (query.keyword) {
-      qb.andWhere(
-        new Brackets((qb) => {
-          qb.where('project.name ILIKE :keyword', {
-            keyword: `%${query.keyword}%`,
-          }).orWhere(
-            "to_tsvector('portuguese', project.description) @@ plainto_tsquery('portuguese', :q)",
-            {
-              q: query.keyword,
-            },
-          );
-        }),
-      );
+      this.filterRepository.queryKeyword(qb, 'project', query.keyword);
     }
 
     if (query.initialDate && !query.endDate) {
-      qb.andWhere('project.createdAt >= :initialDate', {
-        initialDate: query.initialDate,
-      });
+      this.filterRepository.queryInitialDate(qb, 'project', query.initialDate);
     }
 
     if (!query.initialDate && query.endDate) {
-      qb.andWhere('project.createdAt <= :endDate', { endDate: query.endDate });
+      this.filterRepository.queryEndDate(qb, 'project', query.endDate);
     }
 
     if (query.initialDate && query.endDate) {
-      qb.andWhere('project.createdAt BETWEEN :initialDate AND :endDate', {
-        initialDate: query.initialDate,
-        endDate: query.endDate,
-      });
+      this.filterRepository.queryInitialAndEndDate(
+        qb,
+        'project',
+        query.initialDate,
+        query.endDate,
+      );
     }
 
     const [data, total] = await qb.getManyAndCount();
