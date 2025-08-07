@@ -8,6 +8,7 @@ import { UsersModule } from './domains/users/users.module';
 import { ImageKitModule } from './integrations/imagekit/imagekit.module';
 import { AdminUserModule } from './domains/users/admin-users/admin-users.module';
 import { CommonUserModule } from './domains/users/common-users/common-users.module';
+import { GuidelinesRequestsModule } from './domains/guidelines-requests/guidelines-requests.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { CommonUserModule } from './domains/users/common-users/common-users.modu
     UsersModule,
     ImageKitModule,
     AdminUserModule,
+    GuidelinesRequestsModule,
   ],
 })
 export class AppModule {}
