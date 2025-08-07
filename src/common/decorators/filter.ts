@@ -1,21 +1,27 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import { GuidelineFilter, GuidelineRequestFilter } from 'src/types/filter';
 
 const Filter = createParamDecorator((_data: unknown, ctx: ExecutionContext) => {
   const request = ctx.switchToHttp().getRequest();
 
-  const { keyword, initialDate, endDate, deficiences, statusCode, isDeleted } =
-    request.query;
-
-  const iDate = new Date(initialDate);
-  const eDate = new Date(endDate);
+  const {
+    keyword,
+    initialDate,
+    endDate,
+    deficiences,
+    statusCode,
+    isDeleted,
+    isRequest,
+  } = request.query as GuidelineFilter & GuidelineRequestFilter;
 
   return {
     keyword,
-    initialDate: isNaN(iDate.getTime()) ? undefined : iDate,
-    endDate: isNaN(eDate.getTime()) ? undefined : eDate,
+    initialDate,
+    endDate,
     deficiences,
     statusCode,
     isDeleted: isDeleted === 'true' ? true : false,
+    isRequest: isRequest === 'true' ? true : false,
   };
 });
 
