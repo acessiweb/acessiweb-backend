@@ -20,6 +20,12 @@ import { RoutePolicyGuard } from 'src/services/auth/guards/route-policy.guard';
 export class CommonUserController {
   constructor(private readonly commonUsersService: CommonUserService) {}
 
+  @Post('google')
+  async googleAuth(@Body() body: { idToken: string }) {
+    console.log('hey');
+    return this.commonUsersService.validateGoogleAuth(body.idToken);
+  }
+
   @Post()
   async create(@Body() createCommonUserDto: CreateCommonUserDto) {
     return await this.commonUsersService.create(createCommonUserDto);

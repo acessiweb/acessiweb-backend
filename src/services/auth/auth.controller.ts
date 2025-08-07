@@ -1,13 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpStatus,
-  Post,
-  Put,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Post, Put, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
@@ -20,46 +11,10 @@ import { RoutePolicies } from './enum/route-policies.enum';
 import { RoutePolicyGuard } from './guards/route-policy.guard';
 import { UpdateMobilePhoneDto } from './dto/update-phone.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-import CustomException from 'src/common/exceptions/custom-exception.exception';
-import { RESOURCE_NOT_FOUND } from 'src/common/constants/errors';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-
-  @Post('google')
-  async googleAuth(@Body() body: { idToken: string }) {
-    return this.authService.validateGoogleAuth(body.idToken);
-  }
-
-  @Get('lookup')
-  async lookup(
-    @Query('email') email?: string,
-    @Query('mobilePhone') mobilePhone?: string,
-  ) {
-    const auth = await this.authService.findOne({
-      email: email,
-      mobilePhone: mobilePhone,
-    });
-
-    if (auth) {
-      return {
-        id: auth.user.id,
-        role: auth.user.role,
-        username:
-          'username' in auth.user && typeof auth.user.username == 'string'
-            ? auth.user.username
-            : '',
-      };
-    }
-
-    throw new CustomException(
-      'Usuário não encontrado',
-      RESOURCE_NOT_FOUND,
-      [],
-      HttpStatus.NOT_FOUND,
-    );
-  }
 
   @Post('login')
   login(@Body() loginDto: LoginDto) {

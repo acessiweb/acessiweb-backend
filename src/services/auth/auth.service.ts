@@ -7,7 +7,7 @@ import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { Auth } from './entities/auth.entity';
 import jwtConfig from './config/jwt.config';
-import { ConfigService, ConfigType } from '@nestjs/config';
+import { ConfigType } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { TokenPayloadDto } from './dto/token-payload.dto';
 import CustomException from 'src/common/exceptions/custom-exception.exception';
@@ -22,14 +22,12 @@ import { UpdateEmailDto } from './dto/update-email.dto';
 import { UpdateMobilePhoneDto } from './dto/update-phone.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { AdminUser } from 'src/domains/users/admin-users/entities/admin-user.entity';
-import { OAuth2Client } from 'google-auth-library';
+
 import { CommonUser } from 'src/domains/users/common-users/entities/common-user.entity';
 import { CryptoService } from '../crypto/crypto.service';
 
 @Injectable()
 export class AuthService {
-  private googleClient: OAuth2Client;
-
   constructor(
     private readonly hashingService: HashingService,
     @InjectRepository(Auth)
@@ -38,18 +36,13 @@ export class AuthService {
     @Inject(jwtConfig.KEY)
     private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
     private readonly jwtService: JwtService,
-    private configService: ConfigService,
-  ) {
-    this.googleClient = new OAuth2Client(
-      this.configService.get<string>('GOOGLE_CLIENT_ID'),
-    );
-  }
+  ) {}
 
   async findOne(where: {
     email?: string;
     mobilePhone?: string;
     userId?: string;
-  }): Promise<Auth | null> {
+  }): Promise<Auth | undefined | null> {
     const qb = this.authRepository
       .createQueryBuilder('auth')
       .leftJoinAndSelect('auth.user', 'user');
@@ -70,8 +63,12 @@ export class AuthService {
       qb.where('auth.user = :user', { user: where.userId });
     }
 
-    const auth = await qb.getOne();
-    return auth;
+    try {
+      const auth = await qb.getOne();
+      return auth;
+    } catch (e) {
+      return;
+    }
   }
 
   throwEmailOrMobilePhoneEmpty() {
@@ -391,33 +388,4 @@ export class AuthService {
       refreshToken,
     };
   }
-
-  async validateGoogleAuth(idToken: string) {
-    try {
-      const ticket = await this.googleClient.verifyIdToken({
-        idToken: idToken,
-        audience: this.configService.get<string>('GOOGLE_CLIENT_ID'),
-      });
-      const payload = ticket.getPayload();
-
-      if (!payload || !payload.sub || !payload.email) {
-        throw new CustomException('Google ID Token inválido', INVALID_DATA);
-      }
-
-      const auth = await this.findOne({
-        email: payload.email,
-      });
-
-      if (!auth) {
-      }
-
-      const tokens = await this.createTokens(auth!);
-      return tokens;
-    } catch (error) {
-      console.error('Google ID token verification failed:', error);
-      return;
-    }
-  }
-
-  async validateTwitterAuth() {}
 }

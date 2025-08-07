@@ -9,6 +9,7 @@ import { ImageKitModule } from './integrations/imagekit/imagekit.module';
 import { AdminUserModule } from './domains/users/admin-users/admin-users.module';
 import { CommonUserModule } from './domains/users/common-users/common-users.module';
 import { GuidelinesRequestsModule } from './domains/guidelines-requests/guidelines-requests.module';
+import { AuthModule } from './services/auth/auth.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { GuidelinesRequestsModule } from './domains/guidelines-requests/guidelin
     ImageKitModule,
     AdminUserModule,
     GuidelinesRequestsModule,
+    AuthModule,
   ],
 })
 export class AppModule {}
