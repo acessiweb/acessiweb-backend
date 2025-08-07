@@ -7,6 +7,7 @@ import { UsersModule } from 'src/domains/users/users.module';
 import { DeficiencesModule } from 'src/domains/deficiences/deficiences.module';
 import { GuidelinesRepository } from './guidelines.repository';
 import { ImageKitModule } from 'src/integrations/imagekit/imagekit.module';
+import { FilterRepository } from 'src/common/repositories/filter.repository';
 
 @Module({
   imports: [
@@ -16,7 +17,7 @@ import { ImageKitModule } from 'src/integrations/imagekit/imagekit.module';
     ImageKitModule,
   ],
   controllers: [GuidelinesController],
-  providers: [GuidelinesService, GuidelinesRepository],
+  providers: [GuidelinesService, GuidelinesRepository, FilterRepository],
   exports: [GuidelinesService, GuidelinesRepository],
 })
 export class GuidelinesModule {}

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Brackets, DataSource, Repository, UpdateResult } from 'typeorm';
+import { DataSource, Repository, UpdateResult } from 'typeorm';
 import { Guideline } from 'src/domains/guidelines/entities/guideline.entity';
 import { getPagination } from 'src/common/utils/pagination';
 import {
@@ -8,6 +8,8 @@ import {
   Guideline as GuidelineType,
 } from 'src/types/guideline';
 import { PaginationResponse } from 'src/types/pagination';
+import { FilterRepository } from 'src/common/repositories/filter.repository';
+import { GuidelineQuery } from 'src/types/query';
 
 @Injectable()
 export class GuidelinesRepository {
@@ -15,6 +17,7 @@ export class GuidelinesRepository {
     @InjectRepository(Guideline)
     private readonly guidelineRepository: Repository<Guideline>,
     private readonly dataSource: DataSource,
+    private readonly filterRepository: FilterRepository,
   ) {}
 
   private async findAllGuidelineDeficiencies(
@@ -24,8 +27,8 @@ export class GuidelinesRepository {
         SELECT d.id, d.name
         FROM deficiency d
         JOIN guideline_deficiences_deficiency gd
-          ON gd."guidelineId" = d.id
-        WHERE gd."guidelineId" = '${guidelineId}'
+        ON d.id=gd."deficiencyId"
+        WHERE gd."guidelineId" = '${guidelineId}';
       `;
 
     return this.dataSource.query(sql);
@@ -189,18 +192,7 @@ export class GuidelinesRepository {
     });
   }
 
-  async findAll(query: {
-    limit: number;
-    offset: number;
-    userId?: string;
-    deficiences?: string[];
-    statusCode?: string;
-    keyword?: string;
-    initialDate?: Date;
-    endDate?: Date;
-    isRequest?: boolean;
-    isDeleted?: boolean;
-  }): Promise<PaginationResponse> {
+  async findAll(query: GuidelineQuery): Promise<PaginationResponse> {
     const qb = this.guidelineRepository
       .createQueryBuilder('guideline')
       .leftJoinAndSelect('guideline.deficiences', 'deficiences')
@@ -216,43 +208,28 @@ export class GuidelinesRepository {
     }
 
     if (query.keyword) {
-      qb.andWhere(
-        new Brackets((qb) => {
-          qb.where('guideline.name ILIKE :keyword', {
-            keyword: `%${query.keyword}%`,
-          }).orWhere(
-            "to_tsvector('portuguese', guideline.description) @@ plainto_tsquery('portuguese', :q)",
-            {
-              q: query.keyword,
-            },
-          );
-        }),
-      );
+      this.filterRepository.queryKeyword(qb, 'guideline', query.keyword);
     }
 
     if (query.initialDate && !query.endDate) {
-      const date = query.initialDate.toISOString().slice(0, 10);
-
-      qb.andWhere('DATE(guideline.createdAt) >= :initialDate', {
-        initialDate: date,
-      });
+      this.filterRepository.queryInitialDate(
+        qb,
+        'guideline',
+        query.initialDate,
+      );
     }
 
     if (!query.initialDate && query.endDate) {
-      const date = query.endDate.toISOString().slice(0, 10);
-      qb.andWhere('guideline.createdAt <= :endDate', {
-        endDate: date,
-      });
+      this.filterRepository.queryEndDate(qb, 'guideline', query.endDate);
     }
 
     if (query.initialDate && query.endDate) {
-      const initialDate = query.initialDate.toISOString().slice(0, 10);
-      const endDate = query.endDate.toISOString().slice(0, 10);
-
-      qb.andWhere('guideline.createdAt BETWEEN :initialDate AND :endDate', {
-        initialDate: initialDate,
-        endDate: endDate,
-      });
+      this.filterRepository.queryInitialAndEndDate(
+        qb,
+        'guideline',
+        query.initialDate,
+        query.endDate,
+      );
     }
 
     if (query.deficiences && query.deficiences.length > 0) {
@@ -269,13 +246,13 @@ export class GuidelinesRepository {
       }
     }
 
-    if (query.isRequest) {
+    if ('isRequest' in query) {
       qb.andWhere('guideline.isRequest = :isRequest', {
         isRequest: query.isRequest,
       });
     }
 
-    if (query.isDeleted) {
+    if ('isDeleted' in query) {
       qb.withDeleted();
       qb.andWhere('guideline.deletedAt IS NOT NULL');
     }

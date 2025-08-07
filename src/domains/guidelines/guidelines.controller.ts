@@ -5,7 +5,6 @@ import {
   Get,
   Param,
   ParseUUIDPipe,
-  Patch,
   Post,
   Put,
   UploadedFile,
@@ -22,12 +21,8 @@ import { AuthTokenGuard } from 'src/services/auth/guards/auth-token.guard';
 import { TokenPayloadDto } from 'src/services/auth/dto/token-payload.dto';
 import { TokenPayloadParam } from 'src/services/auth/params/token-payload.param';
 import { UpdateGuidelineDto } from './dto/update-guideline.dto';
-import { SetRoutePolicy } from 'src/services/auth/decorators/set-route-policy.decorator';
-import { RoutePolicies } from 'src/services/auth/enum/route-policies.enum';
-import { RoutePolicyGuard } from 'src/services/auth/guards/route-policy.guard';
-import { UpdateStatusDto } from './dto/update-status.dto';
 import { PaginationParams } from 'src/types/pagination';
-import { FilterParams } from 'src/types/filter';
+import { GuidelineFilter } from 'src/types/filter';
 
 @Controller('guidelines')
 export class GuidelinesController {
@@ -65,18 +60,8 @@ export class GuidelinesController {
     );
   }
 
-  @SetRoutePolicy(RoutePolicies.admin)
-  @UseGuards(AuthTokenGuard, RoutePolicyGuard)
-  @Patch(':gid')
-  async updateStatus(
-    @Param('gid') gid: string,
-    @Body() updateStatusDto: UpdateStatusDto,
-  ) {
-    return await this.guidelinesService.updateStatus(gid, updateStatusDto);
-  }
-
   @UseGuards(AuthTokenGuard)
-  @Delete('guidelines/:gid')
+  @Delete(':gid')
   async delete(
     @Param('gid', ParseUUIDPipe) gid: string,
     @TokenPayloadParam() tokenPayload: TokenPayloadDto,
@@ -92,7 +77,7 @@ export class GuidelinesController {
   @Get()
   async findAll(
     @Pagination() pagination: PaginationParams,
-    @Filter() filters?: FilterParams,
+    @Filter() filters?: GuidelineFilter,
   ) {
     return await this.guidelinesService.findAll({
       keyword: filters?.keyword,

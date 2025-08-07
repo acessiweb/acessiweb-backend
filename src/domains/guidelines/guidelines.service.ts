@@ -18,6 +18,7 @@ import { getIdsToAdd, getIdsToRemove } from 'src/common/utils/filter';
 import { ImageKitService } from 'src/integrations/imagekit/imagekit.service';
 import { UploadResponse } from 'imagekit/dist/libs/interfaces';
 import { UpdateStatusDto } from './dto/update-status.dto';
+import { GuidelineQuery } from 'src/types/query';
 
 @Injectable()
 export class GuidelinesService {
@@ -238,18 +239,7 @@ export class GuidelinesService {
     );
   }
 
-  async findAll(query: {
-    limit: number;
-    offset: number;
-    userId?: string;
-    deficiences?: string[];
-    statusCode?: string;
-    keyword?: string;
-    initialDate?: Date;
-    endDate?: Date;
-    isRequest?: boolean;
-    isDeleted?: boolean;
-  }) {
+  async findAll(query: GuidelineQuery) {
     return await this.guidelinesRepo.findAll(query);
   }
 
