@@ -7,6 +7,7 @@ import { Guideline } from '../guidelines/entities/guideline.entity';
 import { GuidelinesRequestsController } from './guidelines-requests.controller';
 import { GuidelinesService } from '../guidelines/guidelines.service';
 import { GuidelinesRepository } from '../guidelines/guidelines.repository';
+import { FilterRepository } from 'src/common/repositories/filter.repository';
 
 @Module({
   imports: [
@@ -16,7 +17,7 @@ import { GuidelinesRepository } from '../guidelines/guidelines.repository';
     ImageKitModule,
   ],
   controllers: [GuidelinesRequestsController],
-  providers: [GuidelinesService, GuidelinesRepository],
+  providers: [GuidelinesService, GuidelinesRepository, FilterRepository],
   exports: [GuidelinesService, GuidelinesRepository],
 })
-export class GuidelinesModule {}
+export class GuidelinesRequestsModule {}
