@@ -1,5 +1,4 @@
 import {
-  ArrayNotEmpty,
   IsArray,
   IsNotEmpty,
   IsOptional,
@@ -19,9 +18,6 @@ export class CreateProjectDto {
   desc: string;
 
   @IsArray({ message: 'As diretrizes do projeto são do tipo array' })
-  @ArrayNotEmpty({
-    message: 'O projeto precisa ter pelo menos uma diretriz relacionada',
-  })
   @IsUUID(4, { each: true, message: 'A diretriz é do tipo UUID' })
   guidelines: string[];
 }
