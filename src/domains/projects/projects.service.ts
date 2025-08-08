@@ -5,7 +5,6 @@ import { GuidelinesService } from 'src/domains/guidelines/guidelines.service';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import {
   DELETE_OPERATION_FAILED,
-  REQUIRED_FIELD,
   RESOURCE_NOT_FOUND,
   UPDATE_OPERATION_FAILED,
 } from 'src/common/constants/errors';
@@ -48,15 +47,6 @@ export class ProjectsService {
       this.commonUserService.findOneBy(userId),
       this.getSanitizedArrayOfIds(createProjectDto.guidelines),
     ]);
-
-    if (guidelines.length === 0) {
-      throw new CustomException(
-        'O projeto precisa ter ao menos uma diretriz válida relacionada',
-        REQUIRED_FIELD,
-        ['guidelines'],
-        HttpStatus.BAD_REQUEST,
-      );
-    }
 
     const project = new Project();
     project.name = createProjectDto.name;
