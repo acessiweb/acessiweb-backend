@@ -16,8 +16,8 @@ const Filter = createParamDecorator((_data: unknown, ctx: ExecutionContext) => {
 
   return {
     keyword,
-    initialDate,
-    endDate,
+    initialDate: initialDate === 'undefined' ? '' : initialDate,
+    endDate: endDate === 'undefined' ? '' : endDate,
     deficiences,
     statusCode,
     isDeleted: isDeleted === 'true' ? true : false,
