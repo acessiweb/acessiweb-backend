@@ -47,6 +47,14 @@ export class ProjectsRepository {
     return await this.projectRepository.delete(id);
   }
 
+  async deleteAll(userId: string): Promise<DeleteResult> {
+    return await this.projectRepository.delete({
+      user: {
+        id: userId,
+      },
+    });
+  }
+
   async findOne(id: string): Promise<Project | null> {
     return await this.projectRepository.findOne({
       where: { id },

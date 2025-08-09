@@ -53,6 +53,11 @@ export class ProjectsController {
     return await this.projectsService.delete(pid);
   }
 
+  @Delete()
+  async deleteAll(@TokenPayloadParam() tokenPayload: TokenPayloadDto) {
+    return await this.projectsService.deleteAll(tokenPayload);
+  }
+
   @Get()
   async findAll(
     @TokenPayloadParam() tokenPayload: TokenPayloadDto,

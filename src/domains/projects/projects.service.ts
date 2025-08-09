@@ -13,6 +13,7 @@ import { ProjectsRepository } from './projects.repository';
 import { getIdsToAdd, getIdsToRemove } from 'src/common/utils/filter';
 import { CommonUserService } from '../users/common-users/common-users.service';
 import { ProjectQuery } from 'src/types/query';
+import { TokenPayload } from 'google-auth-library';
 
 @Injectable()
 export class ProjectsService {
@@ -103,6 +104,21 @@ export class ProjectsService {
 
     throw new CustomException(
       `Não foi possível deletar projeto id ${id}`,
+      DELETE_OPERATION_FAILED,
+      [],
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+  }
+
+  async deleteAll(tokenPayload: TokenPayload) {
+    const deleted = await this.projRepo.deleteAll(tokenPayload.sub);
+
+    if (deleted.affected && deleted.affected > 0) {
+      return [];
+    }
+
+    throw new CustomException(
+      'Não foi possível deletar seus projetos',
       DELETE_OPERATION_FAILED,
       [],
       HttpStatus.INTERNAL_SERVER_ERROR,
