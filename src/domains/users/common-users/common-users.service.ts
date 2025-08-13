@@ -15,6 +15,9 @@ import { CommonUser } from './entities/common-user.entity';
 import { UpdateCommonUserDto } from './dto/update-common-user.dto';
 import { OAuth2Client } from 'google-auth-library';
 import { ConfigService } from '@nestjs/config';
+import { Auth } from 'src/services/auth/entities/auth.entity';
+import { Octokit } from 'octokit';
+import { OctokitEmail } from 'src/types/octokit';
 
 @Injectable()
 export class CommonUserService {
@@ -142,50 +145,77 @@ export class CommonUserService {
     }
   }
 
-  async validateGoogleAuth(idToken: string) {
-    try {
-      const ticket = await this.googleClient.verifyIdToken({
-        idToken: idToken,
-        audience: this.configService.get<string>('GOOGLE_CLIENT_ID'),
+  async createAuthenticationForProvider(
+    email: string,
+    name: string,
+  ): Promise<Auth | null | undefined> {
+    const auth = await this.authService.findOne({
+      email: email,
+    });
+
+    if (!auth) {
+      const commonUser = await this.create({
+        username: name || '',
+        email: email,
+        password: '',
+        confirmPassword: '',
       });
-      const payload = ticket.getPayload();
 
-      if (!payload || !payload.sub || !payload.email) {
-        throw new CustomException('Google ID Token inválido', INVALID_DATA);
+      if (commonUser.id) {
+        const auth2 = await this.authService.findOne({
+          email: email,
+        });
+
+        return auth2;
       }
-
-      const auth = await this.authService.findOne({
-        email: payload.email,
-      });
-
-      if (!auth) {
-        try {
-          const commonUser = await this.create({
-            username: payload.name || '',
-            email: payload.email,
-            password: '',
-            confirmPassword: '',
-          });
-
-          if (commonUser.id) {
-            const auth2 = await this.authService.findOne({
-              email: payload.email,
-            });
-
-            const tokens = await this.authService.createTokens(auth2!);
-            return tokens;
-          }
-        } catch (e) {
-          console.error(e);
-          return;
-        }
-      }
-
-      const tokens = await this.authService.createTokens(auth!);
-      return tokens;
-    } catch (error) {
-      console.error('Google ID token verification failed:', error);
-      return;
     }
+
+    return auth;
+  }
+
+  async validateGoogleAuth(idToken: string) {
+    const ticket = await this.googleClient.verifyIdToken({
+      idToken: idToken,
+      audience: this.configService.get<string>('GOOGLE_CLIENT_ID'),
+    });
+
+    const payload = ticket.getPayload();
+
+    if (!payload || !payload.sub || !payload.email) {
+      throw new CustomException('Google ID Token inválido', INVALID_DATA);
+    }
+
+    const auth = await this.createAuthenticationForProvider(
+      payload.email,
+      payload.name!,
+    );
+
+    const tokens = await this.authService.createTokens(auth!);
+    return tokens;
+  }
+
+  async validateGithubAuth(accessToken: string) {
+    const octokit = new Octokit({
+      auth: accessToken,
+    });
+
+    const { data: user } = await octokit.rest.users.getAuthenticated();
+
+    const { data: emails } =
+      await octokit.rest.users.listEmailsForAuthenticatedUser();
+
+    const email: OctokitEmail = emails
+      ? emails.find((email: OctokitEmail) => email.primary)
+      : ({} as OctokitEmail);
+
+    const auth = await this.createAuthenticationForProvider(
+      email.email,
+      user.name,
+    );
+
+    console.log(auth);
+
+    const tokens = await this.authService.createTokens(auth!);
+    return tokens;
   }
 }

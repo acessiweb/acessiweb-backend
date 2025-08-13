@@ -22,8 +22,12 @@ export class CommonUserController {
 
   @Post('google')
   async googleAuth(@Body() body: { idToken: string }) {
-    console.log('hey');
     return this.commonUsersService.validateGoogleAuth(body.idToken);
+  }
+
+  @Post('github')
+  async githubAuth(@Body() body: { accessToken: string }) {
+    return this.commonUsersService.validateGithubAuth(body.accessToken);
   }
 
   @Post()
