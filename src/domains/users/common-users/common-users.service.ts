@@ -213,8 +213,6 @@ export class CommonUserService {
       user.name,
     );
 
-    console.log(auth);
-
     const tokens = await this.authService.createTokens(auth!);
     return tokens;
   }
