@@ -25,10 +25,10 @@ export class CommonUserController {
     return this.commonUsersService.validateGoogleAuth(body.idToken);
   }
 
-  // @Post('github')
-  // async githubAuth(@Body() body: { accessToken: string }) {
-  //   return this.commonUsersService.validateGithubAuth(body.accessToken);
-  // }
+  @Post('github')
+  async githubAuth(@Body() body: { accessToken: string }) {
+    return this.commonUsersService.validateGithubAuth(body.accessToken);
+  }
 
   @Post()
   async create(@Body() createCommonUserDto: CreateCommonUserDto) {
