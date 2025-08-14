@@ -16,8 +16,8 @@ import { UpdateCommonUserDto } from './dto/update-common-user.dto';
 import { OAuth2Client } from 'google-auth-library';
 import { ConfigService } from '@nestjs/config';
 import { Auth } from 'src/services/auth/entities/auth.entity';
-import { Octokit } from 'octokit';
-import { OctokitEmail } from 'src/types/octokit';
+// import { Octokit } from 'octokit';
+// import { OctokitEmail } from 'src/types/octokit';
 
 @Injectable()
 export class CommonUserService {
@@ -194,26 +194,21 @@ export class CommonUserService {
     return tokens;
   }
 
-  async validateGithubAuth(accessToken: string) {
-    const octokit = new Octokit({
-      auth: accessToken,
-    });
-
-    const { data: user } = await octokit.rest.users.getAuthenticated();
-
-    const { data: emails } =
-      await octokit.rest.users.listEmailsForAuthenticatedUser();
-
-    const email: OctokitEmail = emails
-      ? emails.find((email: OctokitEmail) => email.primary)
-      : ({} as OctokitEmail);
-
-    const auth = await this.createAuthenticationForProvider(
-      email.email,
-      user.name,
-    );
-
-    const tokens = await this.authService.createTokens(auth!);
-    return tokens;
-  }
+  // async validateGithubAuth(accessToken: string) {
+  //   // const octokit = new Octokit({
+  //   //   auth: accessToken,
+  //   // });
+  //   // const { data: user } = await octokit.rest.users.getAuthenticated();
+  //   // const { data: emails } =
+  //   //   await octokit.rest.users.listEmailsForAuthenticatedUser();
+  //   // const email: OctokitEmail = emails
+  //   //   ? emails.find((email: OctokitEmail) => email.primary)
+  //   //   : ({} as OctokitEmail);
+  //   // const auth = await this.createAuthenticationForProvider(
+  //   //   email.email,
+  //   //   user.name,
+  //   // );
+  //   // const tokens = await this.authService.createTokens(auth!);
+  //   // return tokens;
+  // }
 }
