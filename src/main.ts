@@ -29,7 +29,7 @@ async function bootstrap() {
     new ValidationExceptionFilter(),
     new CustomExceptionFilter(),
   );
-  const server = await app.listen(8080);
+  const server = await app.listen(process.env.PORT || 8080);
   console.log('Rodando na porta', (server.address() as any).port);
 }
 
