@@ -193,6 +193,8 @@ export class CommonUserService {
     return tokens;
   }
 
+  //rever a necessidade de aumentar space size no render (Reached heap limit Allocation failed - JavaScript heap out of memory),
+  //fazer uma chamada para a API utilizando fetch
   async validateGithubAuth(accessToken: string) {
     const octokit = new Octokit({
       auth: accessToken,

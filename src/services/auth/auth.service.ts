@@ -129,8 +129,7 @@ export class AuthService {
     );
 
     const auth = await this.findOne({
-      email: tokenPayload.email,
-      mobilePhone: tokenPayload.mobilePhone,
+      userId: tokenPayload.sub,
     });
 
     if (!auth) {
@@ -340,7 +339,11 @@ export class AuthService {
     );
   }
 
-  async signJwtAsync(sub: string, payload?: JwtPayload): Promise<string> {
+  async signJwtAsync(
+    type: 'access' | 'refresh',
+    sub: string,
+    payload?: JwtPayload,
+  ): Promise<string> {
     return await this.jwtService.signAsync(
       {
         sub,
@@ -350,7 +353,10 @@ export class AuthService {
         audience: this.jwtConfiguration.audience,
         issuer: this.jwtConfiguration.issuer,
         secret: this.jwtConfiguration.secret,
-        expiresIn: this.jwtConfiguration.jwtTtl,
+        expiresIn:
+          type === 'access'
+            ? this.jwtConfiguration.jwtTtl
+            : this.jwtConfiguration.jwtRefreshTtl,
       },
     );
   }
@@ -379,8 +385,8 @@ export class AuthService {
     }
 
     const [accessToken, refreshToken] = await Promise.all([
-      this.signJwtAsync(auth.user.id, jwtPayload),
-      this.signJwtAsync(auth.user.id),
+      this.signJwtAsync('access', auth.user.id, jwtPayload),
+      this.signJwtAsync('refresh', auth.user.id),
     ]);
 
     return {
