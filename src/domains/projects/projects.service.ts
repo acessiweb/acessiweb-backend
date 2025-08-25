@@ -30,7 +30,7 @@ export class ProjectsService {
 
     for (let rd of removedDuplicate) {
       try {
-        const found = await this.guidelinesService.findOne(rd);
+        const found = await this.guidelinesService.findOne({ id: rd });
 
         if (found.statusCode === 'APPROVED' && !found.isRequest) {
           data.push(found);

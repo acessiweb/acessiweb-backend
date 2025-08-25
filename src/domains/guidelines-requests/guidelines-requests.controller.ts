@@ -4,30 +4,30 @@ import Pagination from 'src/common/decorators/pagination';
 import { PaginationParams } from 'src/types/pagination';
 import Filter from 'src/common/decorators/filter';
 import { GuidelineRequestFilter } from 'src/types/filter';
-import { SetRoutePolicy } from 'src/services/auth/decorators/set-route-policy.decorator';
-import { RoutePolicies } from 'src/services/auth/enum/route-policies.enum';
 import { AuthTokenGuard } from 'src/services/auth/guards/auth-token.guard';
-import { RoutePolicyGuard } from 'src/services/auth/guards/route-policy.guard';
 import { UpdateStatusDto } from '../guidelines/dto/update-status.dto';
 import { TokenPayloadParam } from 'src/services/auth/params/token-payload.param';
 import { TokenPayloadDto } from 'src/services/auth/dto/token-payload.dto';
 import { ACCESS_USER } from 'src/common/constants/access';
 
+@UseGuards(AuthTokenGuard)
 @Controller('guidelines-requests')
 export class GuidelinesRequestsController {
   constructor(private readonly guidelinesService: GuidelinesService) {}
 
-  @SetRoutePolicy(RoutePolicies.admin)
-  @UseGuards(AuthTokenGuard, RoutePolicyGuard)
   @Patch(':gid')
   async updateStatus(
     @Param('gid') gid: string,
     @Body() updateStatusDto: UpdateStatusDto,
+    @TokenPayloadParam() tokenPayload: TokenPayloadDto,
   ) {
-    return await this.guidelinesService.updateStatus(gid, updateStatusDto);
+    return await this.guidelinesService.updateStatus(
+      gid,
+      updateStatusDto,
+      tokenPayload,
+    );
   }
 
-  @UseGuards(AuthTokenGuard)
   @Get()
   async findAll(
     @TokenPayloadParam() tokenPayload: TokenPayloadDto,

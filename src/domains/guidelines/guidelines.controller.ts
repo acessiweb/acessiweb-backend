@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   Put,
   UploadedFile,
@@ -23,6 +24,8 @@ import { TokenPayloadParam } from 'src/services/auth/params/token-payload.param'
 import { UpdateGuidelineDto } from './dto/update-guideline.dto';
 import { PaginationParams } from 'src/types/pagination';
 import { GuidelineFilter } from 'src/types/filter';
+import { SetRoutePolicy } from 'src/services/auth/decorators/set-route-policy.decorator';
+import { RoutePolicies } from 'src/services/auth/enum/route-policies.enum';
 
 @Controller('guidelines')
 export class GuidelinesController {
@@ -60,6 +63,13 @@ export class GuidelinesController {
     );
   }
 
+  @SetRoutePolicy(RoutePolicies.admin)
+  @UseGuards(AuthTokenGuard)
+  @Patch('restore/:gid')
+  async restore(@Param('gid', ParseUUIDPipe) gid: string) {
+    return await this.guidelinesService.restore(gid);
+  }
+
   @UseGuards(AuthTokenGuard)
   @Delete(':gid')
   async delete(
@@ -71,7 +81,7 @@ export class GuidelinesController {
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    return await this.guidelinesService.findOne(id);
+    return await this.guidelinesService.findOne({ id });
   }
 
   @Get()

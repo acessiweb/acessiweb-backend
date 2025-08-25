@@ -21,6 +21,11 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
+  @Post('admin/login')
+  loginAdmin(@Body() loginDto: LoginDto) {
+    return this.authService.loginAdmin(loginDto);
+  }
+
   @Post('refresh')
   refreshTokens(@Body() refreshTokenDto: RefreshTokenDto) {
     return this.authService.refreshTokens(refreshTokenDto);

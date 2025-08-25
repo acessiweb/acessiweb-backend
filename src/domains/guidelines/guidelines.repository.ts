@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository, UpdateResult } from 'typeorm';
+import { DataSource, DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { Guideline } from 'src/domains/guidelines/entities/guideline.entity';
 import { getPagination } from 'src/common/utils/pagination';
 import {
@@ -178,13 +178,20 @@ export class GuidelinesRepository {
     };
   }
 
-  async delete(id: string): Promise<UpdateResult> {
+  async softDelete(id: string): Promise<UpdateResult> {
     return await this.guidelineRepository.softDelete(id);
   }
 
-  async findOne(id: string): Promise<Guideline | null> {
+  async delete(id: string): Promise<DeleteResult> {
+    return await this.guidelineRepository.delete(id);
+  }
+
+  async findOne(query: {
+    id?: string;
+    name?: string;
+  }): Promise<Guideline | null> {
     return this.guidelineRepository.findOne({
-      where: { id },
+      where: query,
       relations: {
         deficiences: true,
         user: true,
@@ -246,6 +253,12 @@ export class GuidelinesRepository {
       }
     }
 
+    if ('statusCode' in query && query.statusCode) {
+      qb.andWhere('guideline.statusCode = :statusCode', {
+        statusCode: query.statusCode,
+      });
+    }
+
     if ('isRequest' in query) {
       qb.andWhere('guideline.isRequest = :isRequest', {
         isRequest: query.isRequest,
@@ -269,6 +282,10 @@ export class GuidelinesRepository {
   }
 
   async create(guideline: Guideline): Promise<Guideline> {
-    return this.guidelineRepository.save(guideline);
+    return await this.guidelineRepository.save(guideline);
+  }
+
+  async restore(id: string): Promise<UpdateResult> {
+    return await this.guidelineRepository.restore(id);
   }
 }

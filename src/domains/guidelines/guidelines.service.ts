@@ -42,7 +42,7 @@ export class GuidelinesService {
           });
           data.push(found);
         } catch (e) {
-          console.log(e);
+          console.error(e);
         }
       }
     }
@@ -50,11 +50,11 @@ export class GuidelinesService {
     return data;
   }
 
-  async findOne(id: string) {
-    const guideline = await this.guidelinesRepo.findOne(id);
+  async findOne(query: { id?: string; name?: string }) {
+    const guideline = await this.guidelinesRepo.findOne(query);
     if (guideline) return guideline;
     throw new CustomException(
-      `Diretriz com "${id}" não encontrada`,
+      `Diretriz ${query.id ? `com "${query.id}"` : `${query.name}`} não encontrada`,
       RESOURCE_NOT_FOUND,
     );
   }
@@ -97,7 +97,7 @@ export class GuidelinesService {
         guideline.image = uploadRes.filePath;
         guideline.imageId = uploadRes.fileId;
       } catch (e) {
-        console.log(e);
+        console.error(e);
       }
     }
 
@@ -126,7 +126,7 @@ export class GuidelinesService {
     image: Express.Multer.File,
     tokenPayload: TokenPayloadDto,
   ) {
-    const guideline = await this.findOne(id);
+    const guideline = await this.findOne({ id });
 
     if (
       tokenPayload.role === ACCESS_USER &&
@@ -154,7 +154,7 @@ export class GuidelinesService {
       try {
         await this.imageKitService.deleteImage(updateGuidelineDto.imageId);
       } catch (e) {
-        console.log('An error occurred trying to delete image: ' + e);
+        console.error('An error occurred trying to delete image: ' + e);
       }
 
       try {
@@ -163,7 +163,7 @@ export class GuidelinesService {
           guideline.user.role === 'admin' ? 'guidelines' : 'guidelines-temp',
         );
       } catch (e) {
-        console.log(e);
+        console.error(e);
       }
     }
 
@@ -183,9 +183,13 @@ export class GuidelinesService {
       tokenPayload.role === ACCESS_USER &&
       guidelineUpdated.statusCode === 'REJECTED'
     ) {
-      const guidelineStatusUpdated = await this.updateStatus(id, {
-        statusCode: 'PENDING',
-      });
+      const guidelineStatusUpdated = await this.updateStatus(
+        id,
+        {
+          statusCode: 'PENDING',
+        },
+        tokenPayload,
+      );
 
       return guidelineStatusUpdated;
     }
@@ -193,16 +197,37 @@ export class GuidelinesService {
     return guidelineUpdated;
   }
 
-  async updateStatus(id: string, updateStatusDto: UpdateStatusDto) {
-    return await this.guidelinesRepo.updateStatus(
-      id,
-      updateStatusDto.statusCode,
-      updateStatusDto.statusMsg,
-    );
+  async updateStatus(
+    id: string,
+    updateStatusDto: UpdateStatusDto,
+    tokenPayload: TokenPayloadDto,
+  ) {
+    const guideline = await this.findOne({ id });
+
+    if (
+      tokenPayload.role === ACCESS_USER &&
+      guideline.statusCode === 'STANDBY'
+    ) {
+      return await this.guidelinesRepo.updateStatus(id, 'PENDING');
+    }
+
+    if (
+      tokenPayload.role === ACCESS_ADMIN &&
+      updateStatusDto.statusCode !== 'STANDBY' &&
+      updateStatusDto.statusCode !== 'PENDING'
+    ) {
+      return await this.guidelinesRepo.updateStatus(
+        id,
+        updateStatusDto.statusCode,
+        updateStatusDto.statusMsg,
+      );
+    }
+
+    return guideline;
   }
 
   async delete(id: string, tokenPayload: TokenPayloadDto) {
-    const guideline = await this.findOne(id);
+    const guideline = await this.findOne({ id });
 
     if (
       tokenPayload.role === ACCESS_USER &&
@@ -218,10 +243,17 @@ export class GuidelinesService {
       this.throwCantEditorDeleteGuideline('delete', 'PENDENTE');
     }
 
-    if (
-      (tokenPayload.role === ACCESS_ADMIN && !guideline.isRequest) ||
-      (tokenPayload.role === ACCESS_USER && guideline.isRequest)
-    ) {
+    if (tokenPayload.role === ACCESS_ADMIN && !guideline.isRequest) {
+      const deleted = await this.guidelinesRepo.softDelete(id);
+
+      if (deleted.affected && deleted.affected > 0) {
+        return {
+          id,
+        };
+      }
+    }
+
+    if (tokenPayload.role === 'ACCESS_USER' && guideline.isRequest) {
       const deleted = await this.guidelinesRepo.delete(id);
 
       if (deleted.affected && deleted.affected > 0) {
@@ -237,6 +269,11 @@ export class GuidelinesService {
       [],
       HttpStatus.INTERNAL_SERVER_ERROR,
     );
+  }
+
+  async restore(gid: string) {
+    // const guideline = await this.findOne({name});
+    return await this.guidelinesRepo.restore(gid);
   }
 
   async findAll(query: GuidelineQuery) {

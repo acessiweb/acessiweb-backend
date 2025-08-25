@@ -101,6 +101,53 @@ export class AuthService {
       mobilePhone: loginDto.mobilePhone,
     });
 
+    if (auth?.user.role === 'admin') {
+      throw new CustomException(
+        'Usuário não autorizado',
+        UNAUTHORIZED,
+        [],
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    const isPasswordValid = await this.hashingService.compare(
+      loginDto.password,
+      auth ? auth.password.toString() : '',
+    );
+
+    if (!auth || !isPasswordValid) {
+      throw new CustomException(
+        `${fieldTranslate} ou senha inválidos`,
+        INVALID_DATA,
+        [field, 'password'],
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    return await this.createTokens(auth);
+  }
+
+  async loginAdmin(loginDto: LoginDto): Promise<{
+    accessToken: string;
+    refreshToken: string;
+  }> {
+    const field = loginDto.email ? 'email' : 'mobilePhone';
+    const fieldTranslate = loginDto.email ? 'email' : 'número de celular';
+
+    const auth = await this.findOne({
+      email: loginDto.email,
+      mobilePhone: loginDto.mobilePhone,
+    });
+
+    if (auth?.user.role === 'user') {
+      throw new CustomException(
+        'Usuário não autorizado',
+        UNAUTHORIZED,
+        [],
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
     const isPasswordValid = await this.hashingService.compare(
       loginDto.password,
       auth ? auth.password.toString() : '',

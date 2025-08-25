@@ -19,7 +19,7 @@ const Filter = createParamDecorator((_data: unknown, ctx: ExecutionContext) => {
     initialDate: initialDate === 'undefined' ? '' : initialDate,
     endDate: endDate === 'undefined' ? '' : endDate,
     deficiences,
-    statusCode,
+    statusCode: statusCode === 'undefined' ? '' : statusCode,
     isDeleted: isDeleted === 'true' ? true : false,
     isRequest: isRequest === 'true' ? true : false,
   };
