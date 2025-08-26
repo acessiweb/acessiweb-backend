@@ -6,6 +6,7 @@ import { DeficiencesService } from 'src/domains/deficiences/deficiences.service'
 import CustomException from 'src/common/exceptions/custom-exception.exception';
 import {
   DELETE_OPERATION_FAILED,
+  DUPLICATE_DATA,
   OPERATION_BLOCKED_BY_STATUS,
   REQUIRED_FIELD,
   RESOURCE_NOT_FOUND,
@@ -19,6 +20,7 @@ import { ImageKitService } from 'src/integrations/imagekit/imagekit.service';
 import { UploadResponse } from 'imagekit/dist/libs/interfaces';
 import { UpdateStatusDto } from './dto/update-status.dto';
 import { GuidelineQuery } from 'src/types/query';
+import { QueryFailedError } from 'typeorm';
 
 @Injectable()
 export class GuidelinesService {
@@ -113,11 +115,23 @@ export class GuidelinesService {
       guideline.isRequest = false;
     }
 
-    const guidelineSaved = await this.guidelinesRepo.create(guideline);
+    try {
+      const guidelineSaved = await this.guidelinesRepo.create(guideline);
+      return {
+        id: guidelineSaved.id,
+      };
+    } catch (e) {
+      if (e instanceof QueryFailedError && e.message.includes('duplicar')) {
+        throw new CustomException(
+          'Já existe uma diretriz com esse nome',
+          DUPLICATE_DATA,
+          ['name'],
+          HttpStatus.BAD_REQUEST,
+        );
+      }
 
-    return {
-      id: guidelineSaved.id,
-    };
+      return;
+    }
   }
 
   async update(

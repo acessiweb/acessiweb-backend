@@ -18,6 +18,8 @@ export class CustomExceptionFilter implements ExceptionFilter {
         exception.httpErrorCode || HttpStatus.INTERNAL_SERVER_ERROR
       ];
 
+    console.log(exception);
+
     response
       .status(exception.httpErrorCode || HttpStatus.INTERNAL_SERVER_ERROR)
       .json({

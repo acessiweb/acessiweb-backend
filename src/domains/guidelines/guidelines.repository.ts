@@ -271,6 +271,7 @@ export class GuidelinesRepository {
     }
 
     const [data, total] = await qb.getManyAndCount();
+
     const pagination = getPagination(query.offset, query.limit, total);
 
     return {
