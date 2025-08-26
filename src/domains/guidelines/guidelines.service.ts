@@ -267,7 +267,7 @@ export class GuidelinesService {
       }
     }
 
-    if (tokenPayload.role === 'ACCESS_USER' && guideline.isRequest) {
+    if (tokenPayload.role === ACCESS_USER && guideline.isRequest) {
       const deleted = await this.guidelinesRepo.delete(id);
 
       if (deleted.affected && deleted.affected > 0) {
