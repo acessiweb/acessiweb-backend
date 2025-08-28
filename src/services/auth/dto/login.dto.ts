@@ -7,7 +7,7 @@ import {
 } from 'class-validator';
 
 export class LoginDto {
-  @Transform(({ value }) => (value === '' ? undefined : value))
+  @Transform(({ value }) => (value === '' ? undefined : value.trim()))
   @IsOptional()
   @IsEmail(
     {},
@@ -17,7 +17,7 @@ export class LoginDto {
   )
   email?: string;
 
-  @Transform(({ value }) => (value === '' ? undefined : value))
+  @Transform(({ value }) => (value === '' ? undefined : value.trim()))
   @IsOptional()
   @IsMobilePhone('pt-BR', {}, { message: 'Número de celular inválido' })
   mobilePhone?: string;
