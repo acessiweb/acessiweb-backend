@@ -97,8 +97,8 @@ export class AuthService {
     const fieldTranslate = loginDto.email ? 'email' : 'número de celular';
 
     const auth = await this.findOne({
-      email: loginDto.email,
-      mobilePhone: loginDto.mobilePhone,
+      email: loginDto.email?.trim(),
+      mobilePhone: loginDto.mobilePhone?.trim(),
     });
 
     if (auth?.user.role === 'admin') {
@@ -111,7 +111,7 @@ export class AuthService {
     }
 
     const isPasswordValid = await this.hashingService.compare(
-      loginDto.password,
+      loginDto.password.trim(),
       auth ? auth.password.toString() : '',
     );
 
@@ -135,8 +135,8 @@ export class AuthService {
     const fieldTranslate = loginDto.email ? 'email' : 'número de celular';
 
     const auth = await this.findOne({
-      email: loginDto.email,
-      mobilePhone: loginDto.mobilePhone,
+      email: loginDto.email?.trim(),
+      mobilePhone: loginDto.mobilePhone?.trim(),
     });
 
     if (auth?.user.role === 'user') {
@@ -149,7 +149,7 @@ export class AuthService {
     }
 
     const isPasswordValid = await this.hashingService.compare(
-      loginDto.password,
+      loginDto.password.trim(),
       auth ? auth.password.toString() : '',
     );
 
