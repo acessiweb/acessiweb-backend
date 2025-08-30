@@ -147,7 +147,10 @@ export class GuidelinesRepository {
     const guideline = await this.guidelineRepository
       .createQueryBuilder()
       .update(Guideline)
-      .set(dataToUpdate)
+      .set({
+        ...dataToUpdate,
+        isRequest: false,
+      })
       .where('id = :id', { id })
       .returning([
         'name',
@@ -203,6 +206,7 @@ export class GuidelinesRepository {
     const qb = this.guidelineRepository
       .createQueryBuilder('guideline')
       .leftJoinAndSelect('guideline.deficiences', 'deficiences')
+      .leftJoinAndSelect('guideline.user', 'user')
       .orderBy('guideline.createdAt', 'ASC')
       .skip(query.offset)
       .take(query.limit)
@@ -259,7 +263,7 @@ export class GuidelinesRepository {
       });
     }
 
-    if ('isRequest' in query) {
+    if ('isRequest' in query && query.isRequest !== 'undefined') {
       qb.andWhere('guideline.isRequest = :isRequest', {
         isRequest: query.isRequest,
       });

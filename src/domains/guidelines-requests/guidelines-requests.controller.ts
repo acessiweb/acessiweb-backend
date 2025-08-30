@@ -41,7 +41,7 @@ export class GuidelinesRequestsController {
       initialDate: filters?.initialDate,
       endDate: filters?.endDate,
       deficiences: filters?.deficiences,
-      isRequest: tokenPayload.role === ACCESS_USER ? filters?.isRequest : true,
+      isRequest: tokenPayload.role === ACCESS_USER ? 'undefined' : true,
       userId: tokenPayload.role === ACCESS_USER ? tokenPayload.sub : undefined,
       statusCode:
         tokenPayload.role === ACCESS_USER ? filters?.statusCode : 'PENDING',
