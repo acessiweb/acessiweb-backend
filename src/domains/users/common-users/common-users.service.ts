@@ -17,6 +17,7 @@ import { OAuth2Client } from 'google-auth-library';
 import { ConfigService } from '@nestjs/config';
 import { Auth } from 'src/services/auth/entities/auth.entity';
 import { Octokit } from '@octokit/rest';
+import normalizeUsername from './util/normalize-username';
 
 @Injectable()
 export class CommonUserService {
@@ -80,6 +81,8 @@ export class CommonUserService {
       if (e instanceof CustomException) {
         throw e;
       }
+
+      console.log(e);
 
       throw new CustomException(
         `Não foi possível criar usuário`,
@@ -186,7 +189,7 @@ export class CommonUserService {
 
     const auth = await this.createAuthenticationForProvider(
       payload.email,
-      payload.name!,
+      normalizeUsername(payload.name!),
     );
 
     const tokens = await this.authService.createTokens(auth!);
@@ -206,7 +209,7 @@ export class CommonUserService {
 
     const auth = await this.createAuthenticationForProvider(
       email?.email || '',
-      user.name || '',
+      normalizeUsername(user.name!),
     );
     const tokens = await this.authService.createTokens(auth!);
     return tokens;
