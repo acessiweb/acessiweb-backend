@@ -16,7 +16,7 @@ export class ImageKitService {
     return await this.imageKit.upload({
       file: file.buffer,
       fileName: file.originalname,
-      folder: `/acessiweb/${folder}`,
+      folder: `acessiweb/${folder}`,
     });
   }
 
