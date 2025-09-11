@@ -164,11 +164,13 @@ export class GuidelinesService {
 
     let uploadRes: UploadResponse = {} as UploadResponse;
 
-    if (image && updateGuidelineDto.imageId) {
-      try {
-        await this.imageKitService.deleteImage(updateGuidelineDto.imageId);
-      } catch (e) {
-        console.error('An error occurred trying to delete image: ' + e);
+    if (image) {
+      if (guideline.imageId) {
+        try {
+          await this.imageKitService.deleteImage(guideline.imageId);
+        } catch (e) {
+          console.error('An error occurred trying to delete image: ' + e);
+        }
       }
 
       try {
