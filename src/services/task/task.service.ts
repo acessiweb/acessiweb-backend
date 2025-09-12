@@ -16,31 +16,21 @@ export class TasksService {
     while (attempt < MAX_ATTEMPTS && !success) {
       attempt++;
       try {
-        await this.runJob();
+        this.logger.debug('Running the job logic...');
+
+        await fetch(
+          'https://acessiweb-backend-w5eh.onrender.com/guidelines?limit=1&offset=0',
+        );
+
         success = true;
         this.logger.debug(`Job succeeded on attempt ${attempt}`);
       } catch (error) {
         this.logger.error(`Attempt ${attempt} failed: ${error}`);
+
+        if (attempt == MAX_ATTEMPTS) {
+          this.logger.error('Max retry attempts reached. Job failed.');
+        }
       }
     }
-
-    if (attempt == MAX_ATTEMPTS) {
-      this.logger.error('Max retry attempts reached. Job failed.');
-    }
-  }
-
-  private async runJob() {
-    this.logger.debug('Running the job logic...');
-
-    const res = await fetch(
-      'https://acessiweb-backend-w5eh.onrender.com/guidelines?limit=1&offset=0',
-    );
-
-    if (!res.ok) {
-      throw new Error(`HTTP error! Status: ${res.status}`);
-    }
-
-    const data = await res.json();
-    return data;
   }
 }
