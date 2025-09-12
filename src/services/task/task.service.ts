@@ -11,9 +11,8 @@ export class TasksService {
 
     const MAX_ATTEMPTS = 3;
     let attempt = 0;
-    let success = false;
 
-    while (attempt < MAX_ATTEMPTS && !success) {
+    while (attempt < MAX_ATTEMPTS) {
       attempt++;
       try {
         this.logger.debug('Running the job logic...');
@@ -22,8 +21,8 @@ export class TasksService {
           'https://acessiweb-backend-w5eh.onrender.com/guidelines?limit=1&offset=0',
         );
 
-        success = true;
         this.logger.debug(`Job succeeded on attempt ${attempt}`);
+        break;
       } catch (error) {
         this.logger.error(`Attempt ${attempt} failed: ${error}`);
 
@@ -32,5 +31,7 @@ export class TasksService {
         }
       }
     }
+
+    this.logger.log('Cron job finished execution');
   }
 }
