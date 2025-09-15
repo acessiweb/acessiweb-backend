@@ -104,8 +104,8 @@ export class GuidelinesRepository {
           'statusMsg',
         ])
         .execute(),
-      addDefs,
-      removeDefs,
+      addDefs(),
+      removeDefs(),
     ]);
 
     const { name, description, code, image, imageDesc, statusCode, statusMsg } =

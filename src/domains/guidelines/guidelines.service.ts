@@ -21,6 +21,7 @@ import { UploadResponse } from 'imagekit/dist/libs/interfaces';
 import { UpdateStatusDto } from './dto/update-status.dto';
 import { GuidelineQuery } from 'src/types/query';
 import { QueryFailedError } from 'typeorm';
+import { Deficiency } from '../deficiences/entities/deficiences.entity';
 
 @Injectable()
 export class GuidelinesService {
@@ -31,10 +32,10 @@ export class GuidelinesService {
     private readonly imageKitService: ImageKitService,
   ) {}
 
-  async getSanitizedArrayOfIds(ids: string[]) {
+  async getSanitizedArrayOfIds(ids: string[]): Promise<Deficiency[]> {
     const removedDuplicate = new Set(ids);
 
-    const data = [];
+    const data = [] as Deficiency[];
 
     for (let rd of removedDuplicate) {
       if (rd) {
@@ -162,6 +163,12 @@ export class GuidelinesService {
 
     const currentIds = guideline.deficiences.map((def) => def.id);
 
+    const receiveDeficiences = await this.getSanitizedArrayOfIds(
+      updateGuidelineDto.deficiences,
+    );
+
+    const receiveIds = receiveDeficiences.map((def) => def.id);
+
     let uploadRes: UploadResponse = {} as UploadResponse;
 
     if (image) {
@@ -191,8 +198,8 @@ export class GuidelinesService {
       uploadRes ? uploadRes.filePath : guideline.image,
       uploadRes ? uploadRes.fileId : guideline.imageId,
       updateGuidelineDto.imageDesc,
-      getIdsToAdd(currentIds, updateGuidelineDto.deficiences),
-      getIdsToRemove(currentIds, updateGuidelineDto.deficiences),
+      getIdsToAdd(currentIds, receiveIds),
+      getIdsToRemove(currentIds, receiveIds),
     );
 
     if (
