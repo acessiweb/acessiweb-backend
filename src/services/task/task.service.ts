@@ -17,9 +17,7 @@ export class TasksService {
       try {
         this.logger.debug('Running the job logic...');
 
-        await fetch(
-          'https://acessiweb-backend-w5eh.onrender.com/guidelines?limit=1&offset=0',
-        );
+        await fetch(`${process.env.BACKEND_URL}/guidelines?limit=1&offset=0`);
 
         this.logger.debug(`Job succeeded on attempt ${attempt}`);
         break;
