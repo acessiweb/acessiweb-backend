@@ -32,6 +32,11 @@ const AppDataSource = new DataSource({
   ssl: { rejectUnauthorized: false },
   synchronize: false,
   logging: true,
+  extra: {
+    max: 10,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 2000,
+  },
 });
 
 export default AppDataSource;
