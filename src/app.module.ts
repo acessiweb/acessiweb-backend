@@ -12,6 +12,7 @@ import { GuidelinesRequestsModule } from './domains/guidelines-requests/guidelin
 import { AuthModule } from './services/auth/auth.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TasksService } from './services/task/task.service';
+import { DatabasePool } from './services/db/db.pool';
 
 @Module({
   imports: [
@@ -47,6 +48,6 @@ import { TasksService } from './services/task/task.service';
     GuidelinesRequestsModule,
     AuthModule,
   ],
-  providers: [TasksService],
+  providers: [TasksService, DatabasePool],
 })
 export class AppModule {}
