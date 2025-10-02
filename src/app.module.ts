@@ -26,9 +26,9 @@ import { TasksService } from './services/task/task.service';
         password: configService.get<string>('DATABASE_PASSWORD'),
         database: configService.get<string>('DATABASE_NAME'),
         ssl:
-          configService.get<string>('DATABASE_USERNAME') === 'true'
-            ? { rejectUnauthorized: false }
-            : false,
+          configService.get<string>('EMULATOR') === 'true'
+            ? false
+            : { rejectUnauthorized: false },
         autoLoadEntities: true,
         synchronize: false, // true = shouldn't be used in production - otherwise you can lose production data
         extra: {
