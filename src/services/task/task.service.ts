@@ -1,12 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { DatabasePool } from '../db/db.pool';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class TasksService {
   private readonly logger = new Logger(TasksService.name);
 
-  constructor(private readonly db: DatabasePool) {}
+  constructor(private readonly dataSource: DataSource) {}
 
   @Cron(CronExpression.EVERY_HOUR)
   async handleCron() {
@@ -36,10 +36,10 @@ export class TasksService {
     this.logger.log('Cron job finished execution');
   }
 
-  @Cron(CronExpression.EVERY_5_MINUTES)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   async handlePing() {
     try {
-      await this.db.query('SELECT 1');
+      await this.dataSource.query('SELECT 1');
       this.logger.log('DB ping OK');
     } catch (err) {
       this.logger.error('DB ping error', err);

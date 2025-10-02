@@ -12,7 +12,6 @@ import { GuidelinesRequestsModule } from './domains/guidelines-requests/guidelin
 import { AuthModule } from './services/auth/auth.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TasksService } from './services/task/task.service';
-import { DatabasePool } from './services/db/db.pool';
 
 @Module({
   imports: [
@@ -26,7 +25,10 @@ import { DatabasePool } from './services/db/db.pool';
         username: configService.get<string>('DATABASE_USERNAME'),
         password: configService.get<string>('DATABASE_PASSWORD'),
         database: configService.get<string>('DATABASE_NAME'),
-        ssl: { rejectUnauthorized: false },
+        ssl:
+          configService.get<string>('DATABASE_USERNAME') === 'true'
+            ? { rejectUnauthorized: false }
+            : false,
         autoLoadEntities: true,
         synchronize: false, // true = shouldn't be used in production - otherwise you can lose production data
         extra: {
@@ -48,6 +50,6 @@ import { DatabasePool } from './services/db/db.pool';
     GuidelinesRequestsModule,
     AuthModule,
   ],
-  providers: [TasksService, DatabasePool],
+  providers: [TasksService],
 })
 export class AppModule {}
