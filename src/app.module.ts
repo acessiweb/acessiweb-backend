@@ -21,21 +21,12 @@ import { TasksService } from './services/task/task.service';
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
         host: configService.get<string>('DATABASE_HOST'),
-        port: parseInt(configService.get<string>('DATABASE_PORT')!, 10),
+        port: configService.get<number>('DATABASE_PORT') || 5432,
         username: configService.get<string>('DATABASE_USERNAME'),
         password: configService.get<string>('DATABASE_PASSWORD'),
         database: configService.get<string>('DATABASE_NAME'),
-        ssl:
-          configService.get<string>('EMULATOR') === 'true'
-            ? false
-            : { rejectUnauthorized: false },
         autoLoadEntities: true,
         synchronize: false, // true = shouldn't be used in production - otherwise you can lose production data
-        extra: {
-          max: 10,
-          idleTimeoutMillis: 30000,
-          connectionTimeoutMillis: 2000,
-        },
       }),
       inject: [ConfigService],
     }),

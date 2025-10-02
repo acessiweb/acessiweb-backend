@@ -29,14 +29,8 @@ const AppDataSource = new DataSource({
     Preference,
   ],
   migrations: [__dirname + '/src/database/migrations/**/*{.ts,.js}'],
-  ssl: process.env.EMULATOR === 'true' ? false : { rejectUnauthorized: false },
   synchronize: false,
   logging: true,
-  extra: {
-    max: 10,
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 2000,
-  },
 });
 
 export default AppDataSource;
