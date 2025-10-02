@@ -1,12 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { DataSource } from 'typeorm';
 
 @Injectable()
 export class TasksService {
   private readonly logger = new Logger(TasksService.name);
-
-  constructor(private readonly dataSource: DataSource) {}
 
   @Cron(CronExpression.EVERY_HOUR)
   async handleCron() {
@@ -34,15 +31,5 @@ export class TasksService {
     }
 
     this.logger.log('Cron job finished execution');
-  }
-
-  @Cron(CronExpression.EVERY_30_SECONDS)
-  async checkDbConnection() {
-    try {
-      const result = await this.dataSource.query('SELECT 1');
-      this.logger.log('DB connection OK', result);
-    } catch (error) {
-      this.logger.error('DB connection error', error);
-    }
   }
 }
