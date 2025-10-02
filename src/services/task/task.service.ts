@@ -42,7 +42,7 @@ export class TasksService {
       await this.dataSource.query('SELECT 1');
       this.logger.log('DB ping OK');
     } catch (err) {
-      this.logger.error('DB ping error', err);
+      this.logger.error('DB ping error');
     }
   }
 }
