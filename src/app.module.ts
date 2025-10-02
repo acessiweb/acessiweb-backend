@@ -25,6 +25,7 @@ import { TasksService } from './services/task/task.service';
         username: configService.get<string>('DATABASE_USERNAME'),
         password: configService.get<string>('DATABASE_PASSWORD'),
         database: configService.get<string>('DATABASE_NAME'),
+        ssl: { rejectUnauthorized: false },
         autoLoadEntities: true,
         synchronize: false, // true = shouldn't be used in production - otherwise you can lose production data
       }),
