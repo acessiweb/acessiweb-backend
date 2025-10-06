@@ -18,22 +18,21 @@ import { AuthModule } from './services/auth/auth.module';
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        url: configService.get<string>('DATABASE_URL'),
         host: configService.get<string>('DATABASE_HOST'),
         port: configService.get<number>('DATABASE_PORT') || 5432,
         username: configService.get<string>('DATABASE_USERNAME'),
         password: configService.get<string>('DATABASE_PASSWORD'),
         database: configService.get<string>('DATABASE_NAME'),
         autoLoadEntities: true,
-        synchronize: false, // true = shouldn't be used in production - otherwise you can lose production data
+        synchronize: configService.get('NODE_ENV') !== 'production', // true = shouldn't be used in production - otherwise you can lose production data
         ssl:
-          configService.get<string>('EMULATOR') === 'true'
-            ? false
-            : { rejectUnauthorized: false },
+          configService.get<string>('NODE_ENV') === 'production'
+            ? { rejectUnauthorized: false }
+            : false,
         extra: {
-          max: 10,
-          connectionTimeoutMillis: 5000,
-          idleTimeoutMillis: 10000,
+          max: 15,
+          connectionTimeoutMillis: 30000,
+          idleTimeoutMillis: 60000,
           family: 4,
         },
       }),
