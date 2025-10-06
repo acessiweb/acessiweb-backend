@@ -82,7 +82,7 @@ export class CommonUserService {
         throw e;
       }
 
-      console.log(e);
+      console.error(e);
 
       throw new CustomException(
         `Não foi possível criar usuário`,

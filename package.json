@@ -20,7 +20,6 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "test:unit": "jest --testMatch \"<rootDir>/src/**/*.spec.ts\"",
     "test:integration": "jest --detectOpenHandles --testMatch \"<rootDir>/test/integration/**/*.integration-spec.ts\"",
-    "typeorm": "npm run build && npx typeorm -d dist/ormconfig.js",
     "migration:generate": "npm run typeorm migration:generate",
     "migration:run": "npm run typeorm migration:run",
     "migration:revert": "npm run typeorm migration:revert"

@@ -10,8 +10,6 @@ import { AdminUserModule } from './domains/users/admin-users/admin-users.module'
 import { CommonUserModule } from './domains/users/common-users/common-users.module';
 import { GuidelinesRequestsModule } from './domains/guidelines-requests/guidelines-requests.module';
 import { AuthModule } from './services/auth/auth.module';
-import { ScheduleModule } from '@nestjs/schedule';
-import { TasksService } from './services/task/task.service';
 
 @Module({
   imports: [
@@ -27,10 +25,18 @@ import { TasksService } from './services/task/task.service';
         database: configService.get<string>('DATABASE_NAME'),
         autoLoadEntities: true,
         synchronize: false, // true = shouldn't be used in production - otherwise you can lose production data
+        ssl:
+          configService.get<string>('EMULATOR') === 'true'
+            ? false
+            : { rejectUnauthorized: false },
+        extra: {
+          max: 10,
+          connectionTimeoutMillis: 5000,
+          family: 4,
+        },
       }),
       inject: [ConfigService],
     }),
-    ScheduleModule.forRoot(),
     CommonUserModule,
     DeficiencesModule,
     GuidelinesModule,
@@ -41,6 +47,5 @@ import { TasksService } from './services/task/task.service';
     GuidelinesRequestsModule,
     AuthModule,
   ],
-  providers: [TasksService],
 })
 export class AppModule {}
