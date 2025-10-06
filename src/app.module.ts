@@ -33,6 +33,7 @@ import { AuthModule } from './services/auth/auth.module';
         extra: {
           max: 10,
           connectionTimeoutMillis: 5000,
+          idleTimeoutMillis: 10000,
           family: 4,
         },
       }),
